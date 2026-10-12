@@ -1,0 +1,16 @@
+<?php
+
+return [
+    'citizenship' => ['Malaysian', 'Non-Malaysian'],
+    'residence_state' => ['Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Labuan', 'Putrajaya'],
+    'current_education_level' => ['secondary', 'pre_university', 'diploma', 'undergraduate', 'postgraduate'],
+    'funding_level' => ['pre_university', 'diploma', 'bachelor', 'master', 'doctorate'],
+    'enrolment_status' => ['planning', 'offer_received', 'enrolled'],
+    'institution_type' => ['public_university', 'private_university', 'college', 'other', 'undecided'],
+    'study_location' => ['Malaysia', 'overseas', 'undecided'],
+    'qualification' => ['SPM', 'STPM', 'UEC', 'A Level', 'Matriculation', 'Foundation', 'Diploma', 'Bachelor', 'Master', 'Other'],
+    'completion_status' => ['completed', 'in_progress'],
+    'result_type' => ['as_count', 'cgpa', 'other'],
+    'criteria' => ['academic' => 'Academic qualifications', 'citizenship' => 'Citizenship', 'funding_level' => 'Programme seeking funding', 'enrolment_status' => 'Enrolment', 'income' => 'Household income', 'study_field' => 'Study field', 'institution_type' => 'Institution', 'study_location' => 'Study location', 'residence_state' => 'State of residence', 'additional' => 'Additional conditions'],
+    'labels' => ['planning' => 'Planning to Apply', 'offer_received' => 'Offer Received', 'enrolled' => 'Already Enrolled', 'as_count' => 'Number of As', 'cgpa' => 'CGPA', 'other' => 'Other', 'bachelor' => 'Bachelor’s degree', 'master' => 'Master’s degree', 'doctorate' => 'Doctorate', 'pre_university' => 'Pre-university', 'public_university' => 'Public university', 'private_university' => 'Private university', 'in_progress' => 'In progress', 'undecided' => 'Undecided', 'none' => 'No Restriction', 'restricted' => 'Restricted', 'manual' => 'Manual Verification'],
+];

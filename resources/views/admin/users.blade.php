@@ -1,0 +1,5 @@
+@extends('layouts.app')
+@section('title','Users')
+@section('content')
+<span class="eyebrow">ACCOUNT MANAGEMENT</span><h1>Users</h1><p class="muted">Review account status and profile completeness.</p><div class="panel table-responsive"><table class="table align-middle"><thead><tr><th>Name / Email</th><th>Role</th><th>Status</th><th>Profile</th><th>Joined</th><th>Action</th></tr></thead><tbody>@foreach($users as $user)<tr><td><b>{{ $user->name }}</b><small class="d-block">{{ $user->email }}</small></td><td>{{ ucfirst($user->role) }}</td><td>{{ $user->is_active?'Active':'Inactive' }}</td><td>{{ $user->role==='student'?($user->profile?->completeness()??0).'%':'N/A' }}</td><td>{{ $user->created_at->format('d M Y') }}</td><td>@if($user->id!==auth()->id())<form method="POST" action="{{ route('admin.users.update',$user) }}">@csrf @method('PATCH')<input type="hidden" name="is_active" value="{{ $user->is_active?'0':'1' }}"><button class="btn btn-outline">{{ $user->is_active?'Deactivate':'Activate' }}</button></form>@else<span class="muted">Your account</span>@endif</td></tr>@endforeach</tbody></table></div>
+@endsection

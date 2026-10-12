@@ -1,0 +1,14 @@
+✔ desktop dashboard, recommendation filters, details and bookmark round trip (2698.1227ms)
+✔ add and remove qualification controls persist a validated profile (2513.6756ms)
+✔ mobile menu works and principal student pages do not overflow (2057.9327ms)
+✔ admin scholarship route controls, reference rows and validation are usable (2013.2758ms)
+✔ academic pathways are clear and fit desktop and small phone cards (1073.7836ms)
+✔ registration assigns a student account and logout returns to sign in (1023.1211ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12073.539

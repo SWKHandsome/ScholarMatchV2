@@ -1,0 +1,5 @@
+@extends('layouts.app')
+@section('title', 'Find your next opportunity')
+@section('content')
+<div class="landing"><span class="eyebrow">EDUCATION HAS POSSIBILITIES. FIND YOURS.</span><h1>Your ambition.<br><span>A scholarship to support it.</span></h1><p>Find funding for your next chapter. Compare scholarship requirements against your qualifications, understand every decision, and save the opportunities that matter.</p><div class="d-flex gap-3"><a class="btn btn-primary" href="{{ route('register') }}">Find my opportunities →</a><a class="btn btn-outline" href="{{ route('login') }}">Sign in</a></div><div class="landing-features"><div class="panel"><b>01 &nbsp; Tell us about you</b><p>Record your qualifications and the programme seeking funding.</p></div><div class="panel"><b>02 &nbsp; Understand your options</b><p>See clear explanations of each recorded requirement.</p></div><div class="panel"><b>03 &nbsp; Take the next step</b><p>Save opportunities and apply on the provider’s website.</p></div></div></div>
+@endsection

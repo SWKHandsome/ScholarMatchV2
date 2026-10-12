@@ -1,0 +1,28 @@
+
+ INFO Configuration cached successfully. 
+
+
+ INFO Routes cached successfully. 
+
+
+
+ INFO Blade templates cached successfully. 
+
+
+ INFO Clearing cached bootstrap files. 
+
+ config .. 2.75ms DONE
+ cache .. 15.95ms DONE
+ compiled .. 1.33ms DONE
+ events .. 0.57ms DONE
+ routes .. 0.90ms DONE
+ views .. 463.18ms DONE
+
+Updated academic card: Blade compilation
+
+
+ INFO Blade templates cached successfully. 
+
+
+ INFO Compiled views cleared successfully. 
+

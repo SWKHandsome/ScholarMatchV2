@@ -1,0 +1,152 @@
+PHPUnit 12.5.38 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.26
+Configuration: D:\Github\ScholarMatchV2\phpunit.xml
+Random Seed:   12345
+
+Time: 00:07, Memory: 64.00 MB
+
+Academic Presentation (Tests\Feature\AcademicPresentation)
+ ✔ Academic requirements are readable and preserve all conditions with data set "zero minimum"
+ ✔ Academic requirements are readable and preserve all conditions with data set "another CGPA scale"
+ ✔ Academic requirements are readable and preserve all conditions with data set "missing minimum"
+ ✔ Academic requirements are readable and preserve all conditions with data set "zero CGPA minimum"
+ ✔ Academic requirements are readable and preserve all conditions with data set "one A"
+ ✔ Academic requirements are readable and preserve all conditions with data set "CGPA out of four"
+ ✔ Academic requirements are readable and preserve all conditions with data set "missing scale"
+ ✔ Academic requirements are readable and preserve all conditions with data set "in progress accepts completed too"
+ ✔ Academic requirements are readable and preserve all conditions with data set "threshold precision"
+ ✔ Academic requirements are readable and preserve all conditions with data set "unknown completion"
+ ✔ Academic requirements are readable and preserve all conditions with data set "unsupported result"
+ ✔ Academic requirements are readable and preserve all conditions with data set "missing As"
+ ✔ Academic requirements are readable and preserve all conditions with data set "SPM count"
+ ✔ Alternatives are separate pathways in recommendations dashboard and saved cards
+ ✔ Unrestricted and manual requirements do not imply a numeric pathway
+ ✔ Manual route notes are visible and escaped
+
+Administrator Dashboard (Tests\Feature\AdministratorDashboard)
+ ✔ Admin dashboard counts effective status and source reviews separately
+ ✔ Users page exposes completeness without sensitive results and can deactivate accounts
+
+Demo Acceptance (Tests\Feature\DemoAcceptance)
+ ✔ Reproducible demo contains one admin ten students and forty labelled scholarships
+ ✔ Warmed recommendations meet two second target with bounded queries
+ ✔ Production seeding is rejected and administrators use controlled setup
+
+Eligibility (Tests\Unit\Eligibility)
+ ✔ Set criteria with data set "missing citizenship"
+ ✔ Set criteria with data set "empty restricted set"
+ ✔ Set criteria with data set "citizenship fails"
+ ✔ Set criteria with data set "offer accepted"
+ ✔ Set criteria with data set "prospective bachelor"
+ ✔ Set criteria with data set "unknown institution"
+ ✔ Set criteria with data set "location fails"
+ ✔ Set criteria with data set "residence passes"
+ ✔ Set criteria with data set "enrolled only"
+ ✔ Set criteria with data set "offer required"
+ ✔ Set criteria with data set "unknown location"
+ ✔ Unrestricted missing information is na and unreviewed requirement is manual
+ ✔ Definite failure overrides unresolved criteria and has no margin
+ ✔ Academic alternatives and margins with data set "above one hundred percent"
+ ✔ Academic alternatives and margins with data set "zero minimum"
+ ✔ Academic alternatives and margins with data set "unknown result"
+ ✔ Academic alternatives and margins with data set "unsupported result"
+ ✔ Academic alternatives and margins with data set "in progress accepted"
+ ✔ Academic alternatives and margins with data set "absent incomplete"
+ ✔ Academic alternatives and margins with data set "multiple satisfied routes choose highest"
+ ✔ Academic alternatives and margins with data set "unresolved subjects"
+ ✔ Academic alternatives and margins with data set "multiple records choose passing"
+ ✔ Academic alternatives and margins with data set "full pass"
+ ✔ Academic alternatives and margins with data set "unresolved route cannot score"
+ ✔ Academic alternatives and margins with data set "failed SPM successful diploma"
+ ✔ Academic alternatives and margins with data set "incompatible scales"
+ ✔ Academic alternatives and margins with data set "subject unresolved with failed result"
+ ✔ Academic alternatives and margins with data set "failed and incompatible route"
+ ✔ Academic alternatives and margins with data set "in progress completed needed"
+ ✔ Academic alternatives and margins with data set "failed but incomplete"
+ ✔ Academic alternatives and margins with data set "below minimum"
+ ✔ Academic alternatives and margins with data set "absent complete"
+ ✔ Academic alternatives and margins with data set "exact minimum"
+ ✔ Numeric income boundaries with data set "zero"
+ ✔ Numeric income boundaries with data set "boundary"
+ ✔ Numeric income boundaries with data set "outside"
+ ✔ Numeric income boundaries with data set "missing"
+ ✔ Income category reference changes take effect and inactive configuration is unresolved
+ ✔ Field restrictions and no hidden database queries
+
+Example (Tests\Feature\Example)
+ ✔ The application returns a successful response
+
+Example (Tests\Unit\Example)
+ ✔ That true is true
+
+Identity (Tests\Feature\Identity)
+ ✔ Registration hashes password and ignores privilege injection
+ ✔ Registration validates email confirmation and uniqueness
+ ✔ Login logout and invalid credentials
+ ✔ Inactive accounts cannot login or continue existing sessions
+ ✔ Guests and students cannot access administrator functions
+ ✔ Authentication forms are accessible and login is rate limited
+
+Income Category Scholarship (Tests\Feature\IncomeCategoryScholarship)
+ ✔ Category rules from string form values are evaluated and reference changes are immediate
+
+Persistence (Tests\Feature\Persistence)
+ ✔ Domain tables and unique profile ownership
+ ✔ Academic records cannot reference a missing profile
+ ✔ Requirement factory creates exactly one parent configuration
+
+Profile (Tests\Feature\Profile)
+ ✔ Profile supports multiple qualifications zero income and intended funding
+ ✔ Partial profiles save and missing income differs from zero
+ ✔ Invalid results income and enums are rejected atomically
+ ✔ Students cannot edit foreign records and administrators cannot edit profiles
+ ✔ Inactive fields can be retained but not newly selected
+ ✔ Owned records can be updated and removed including all records
+
+Recommendation Service (Tests\Feature\RecommendationService)
+ ✔ Default order prioritizes scores then na then manual then failures
+ ✔ Equal margins use deadline then identifier and sort before pagination
+ ✔ Alternative sorts preserve eligibility groups
+ ✔ Filters default open and evaluations refresh after profile and scholarship updates
+
+Reference Data (Tests\Feature\ReferenceData)
+ ✔ Complete income configuration and boundary resolution
+ ✔ Overlap gap negative bounds and missing upper range are rejected
+ ✔ Reference updates preserve ids and change resolution immediately
+ ✔ Study fields are controlled and deactivation preserves records
+
+Scholarship Administration (Tests\Feature\ScholarshipAdministration)
+ ✔ Admin can create alternative routes and source review is audited
+ ✔ Unreviewed blanks cannot publish and drafts are inactive
+ ✔ Invalid restricted sets urls and route thresholds are rejected
+ ✔ Students cannot mutate scholarships and admin can deactivate and delete
+ ✔ Deadlines close after local date or recorded provider time
+
+Scholarship Policy (Tests\Unit\ScholarshipPolicy)
+ ✔ Scholarship mutation permissions with data set "active admin"
+ ✔ Scholarship mutation permissions with data set "inactive admin"
+ ✔ Scholarship mutation permissions with data set "inactive student"
+ ✔ Scholarship mutation permissions with data set "active student"
+
+Security (Tests\Feature\Security)
+ ✔ Database error reports exclude household income and raw queries
+ ✔ Mutations require a csrf token outside the test bypass
+ ✔ Inactive sessions are blocked before any mutation and guest routes redirect
+
+Student Journey (Tests\Feature\StudentJourney)
+ ✔ Dashboard recommendations details and recorded application link
+ ✔ Bookmarks are idempotent owned and preserve closed or inactive opportunities
+ ✔ Eligibility updates on saved page and details after profile changes
+ ✔ Filter validation empty results pagination and student role authorization
+ ✔ Student content is escaped and margin is explained
+ ✔ An incomplete profile does not block browsing and restricted information is manual
+
+Validation Boundary (Tests\Feature\ValidationBoundary)
+ ✔ Malformed profile shapes return validation errors without mutating records
+ ✔ Malformed scholarship criteria and routes return validation errors
+ ✔ Multibyte password over bcrypt byte limit is rejected cleanly
+ ✔ Scholarship update preserves unrestricted modes and audits a new reviewer
+
+OK (108 tests, 608 assertions)
+{"tool":"phpunit","result":"passed","tests":108,"passed":108,"assertions":608,"duration_ms":7001}

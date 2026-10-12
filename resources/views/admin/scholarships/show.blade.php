@@ -1,0 +1,5 @@
+@extends('layouts.app')
+@section('title','Scholarship Details')
+@section('content')
+<a href="{{ route('admin.scholarships.index') }}">← Scholarships</a><div class="panel mt-3"><span class="eyebrow">{{ $scholarship->provider }}</span><h1>{{ $scholarship->name }}</h1><p>{{ $scholarship->description }}</p><p><b>Benefits:</b> {{ $scholarship->benefits }}</p><p><b>Deadline:</b> {{ $scholarship->deadline->format('d M Y') }} · {{ ucfirst($scholarship->effectiveStatus()) }}</p><a class="btn btn-primary" href="{{ route('admin.scholarships.edit',$scholarship) }}">Edit scholarship</a><a class="btn btn-outline" href="{{ $scholarship->source_url }}" target="_blank" rel="noopener noreferrer">Review source ↗</a></div><div class="panel mt-4"><h2>Requirement configuration</h2>@foreach(config('scholarmatch.criteria') as $key=>$label)<div class="border-bottom py-3"><b>{{ $label }}</b> · {{ config('scholarmatch.labels.'.($scholarship->requirements?->criteria[$key]['mode']??''),'Not reviewed') }}<p class="mb-0">{{ $scholarship->requirements?->criteria[$key]['notes']??'' }}</p></div>@endforeach</div>
+@endsection

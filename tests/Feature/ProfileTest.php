@@ -1,0 +1,99 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\StudentAcademicRecord;
+use App\Models\StudentProfile;
+use App\Models\StudyField;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ProfileTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function data(): array
+    {
+        return ['citizenship' => 'Malaysian', 'residence_state' => 'Selangor', 'current_education_level' => 'secondary', 'funding_level' => 'bachelor', 'enrolment_status' => 'planning', 'institution_type' => 'undecided', 'study_location' => 'undecided', 'study_field_undecided' => true, 'household_income' => 0, 'academic_records_complete' => true, 'academic_records' => [
+            ['qualification' => 'SPM', 'completion_status' => 'completed', 'result_type' => 'as_count', 'result_value' => 8, 'grading_scale' => 10],
+            ['qualification' => 'Diploma', 'completion_status' => 'in_progress', 'result_type' => 'cgpa', 'result_value' => 3.8, 'grading_scale' => 4],
+        ]];
+    }
+
+    public function test_profile_supports_multiple_qualifications_zero_income_and_intended_funding(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->put('/profile', $this->data())->assertRedirect();
+        $profile = $user->profile()->firstOrFail();
+        $this->assertSame('0.00', $profile->household_income);
+        $this->assertSame('secondary', $profile->current_education_level);
+        $this->assertSame('bachelor', $profile->funding_level);
+        $this->assertSame(100, $profile->completeness());
+        $this->assertCount(2, $profile->academicRecords);
+        $this->get('/profile')->assertOk()->assertSee('Programme seeking funding')->assertSee('Add Qualification');
+    }
+
+    public function test_partial_profiles_save_and_missing_income_differs_from_zero(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->put('/profile', ['citizenship' => 'Malaysian'])->assertRedirect();
+        $profile = $user->profile()->firstOrFail();
+        $this->assertNull($profile->household_income);
+        $this->assertSame(10, $profile->completeness());
+        $this->assertContains('household income', $profile->missingInformation());
+    }
+
+    public function test_invalid_results_income_and_enums_are_rejected_atomically(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $data = $this->data();
+        $data['household_income'] = -1;
+        $data['citizenship'] = 'invented';
+        $data['academic_records'][0]['result_value'] = 8.5;
+        $data['academic_records'][1]['result_value'] = 4.1;
+        $this->put('/profile', $data)->assertSessionHasErrors(['household_income', 'citizenship', 'academic_records.0.result_value', 'academic_records.1.result_value']);
+        $this->assertDatabaseCount('student_academic_records', 0);
+        $this->assertDatabaseCount('student_profiles', 0);
+    }
+
+    public function test_students_cannot_edit_foreign_records_and_administrators_cannot_edit_profiles(): void
+    {
+        $record = StudentAcademicRecord::factory()->create();
+        $data = $this->data();
+        $data['user_id'] = $record->studentProfile->user_id;
+        $data['academic_records'][0]['id'] = $record->id;
+        $this->actingAs(User::factory()->create())->put('/profile', $data)->assertSessionHasErrors('academic_records.0.id');
+        $this->assertSame('3.8000', $record->fresh()->result_value);
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->put('/profile', $this->data())->assertForbidden();
+    }
+
+    public function test_inactive_fields_can_be_retained_but_not_newly_selected(): void
+    {
+        $profile = StudentProfile::factory()->create();
+        $profile->studyField->update(['is_active' => false]);
+        $this->actingAs(User::findOrFail($profile->user_id));
+        $data = $this->data();
+        $data['study_field_undecided'] = false;
+        $data['study_field_id'] = $profile->study_field_id;
+        $this->put('/profile', $data)->assertRedirect();
+        $this->get('/profile')->assertSee('needs replacement');
+        $data['study_field_id'] = StudyField::factory()->create(['is_active' => false])->id;
+        $this->put('/profile', $data)->assertSessionHasErrors('study_field_id');
+    }
+
+    public function test_owned_records_can_be_updated_and_removed_including_all_records(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->put('/profile', $this->data())->assertRedirect();
+        $record = $user->profile->academicRecords->first();
+        $data = $this->data();
+        $data['academic_records'] = [$data['academic_records'][0] + ['id' => $record->id]];
+        $data['academic_records'][0]['result_value'] = 9;
+        $this->put('/profile', $data)->assertRedirect();
+        $this->assertDatabaseCount('student_academic_records', 1);
+        $this->assertSame('9.0000', $record->fresh()->result_value);
+        $this->put('/profile', ['academic_records' => ''])->assertRedirect();
+        $this->assertDatabaseCount('student_academic_records', 0);
+    }
+}
