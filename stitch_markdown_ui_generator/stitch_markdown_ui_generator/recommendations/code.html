@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-high":"#dde9ff","background":"#f8f9ff","tertiary":"#0a5e2e","surface-variant":"#d5e3fd","surface-container-highest":"#d5e3fd","primary-container":"#0f766e","on-secondary-fixed-variant":"#384760","on-secondary-fixed":"#0b1c32","tertiary-fixed-dim":"#8bd79b","error-container":"#ffdad6","secondary-fixed":"#d5e3ff","primary":"#005c55","on-error-container":"#93000a","tertiary-fixed":"#a6f4b5","on-surface":"#0d1c2f","inverse-primary":"#80d5cb","outline":"#6e7977","secondary-fixed-dim":"#b7c7e5","tertiary-container":"#2c7744","on-surface-variant":"#3e4947","secondary":"#505f79","on-secondary":"#ffffff","on-secondary-container":"#54637d","on-tertiary":"#ffffff","outline-variant":"#bdc9c6","secondary-container":"#d0e0ff","on-background":"#0d1c2f","surface":"#f8f9ff","surface-dim":"#ccdbf4","on-primary-fixed-variant":"#00504a","on-tertiary-container":"#aefcbc","on-tertiary-fixed":"#00210b","on-error":"#ffffff","on-tertiary-fixed-variant":"#005226","on-primary":"#ffffff","surface-bright":"#f8f9ff","on-primary-container":"#a3faef","on-primary-fixed":"#00201d","surface-container-low":"#eff4ff","primary-fixed-dim":"#80d5cb","surface-container-lowest":"#ffffff","error":"#ba1a1a","primary-fixed":"#9cf2e8","surface-container":"#e6eeff","inverse-surface":"#233144","surface-tint":"#006a63","inverse-on-surface":"#ebf1ff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"gutter":"1.5rem","space-sm":"0.5rem","space-md":"1rem","margin":"1.5rem","space-xs":"0.25rem","margin-sm":"1rem","gutter-lg":"2rem","gutter-sm":"1rem","space-xl":"2rem","margin-lg":"3rem","space-lg":"1.5rem"},fontFamily:{"body-lg":["Inter"],"headline-md":["Inter"],"headline-lg-mobile":["Inter"],"body-sm":["Inter"],"label-sm":["Inter"],"title-md":["Inter"],"headline-lg":["Inter"],"headline-sm":["Inter"],"label-md":["Inter"],"body-md":["Inter"],"metric-bold":["Inter"],"title-sm":["Inter"]},fontSize:{"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"headline-md":["24px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"600"}],"headline-lg-mobile":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"label-sm":["12px",{lineHeight:"16px",fontWeight:"500"}],"title-md":["18px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.025em",fontWeight:"700"}],"headline-sm":["20px",{lineHeight:"28px",letterSpacing:"-0.015em",fontWeight:"600"}],"label-md":["13px",{lineHeight:"18px",fontWeight:"500"}],"body-md":["15px",{lineHeight:"22.5px",fontWeight:"400"}],"metric-bold":["14px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"600"}],"title-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm"><img alt="ScholarMatch Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvNbKy-i44uC85O-R6iCU3nDE6_9VlEb1gaE2Umdamyr4Aap5p2lXOA__IV7C540FjKxSIpCYHhmKeNY0UZCoblwnGUySv_adBlU3urZo5PZkxmvHkFuCo2m0A015OQSSQBjZE3KliBOdLQRlcSQxAWy1IebeGcmQAlQ7-P-k5LTkvIk1cFsYpjRwxmNHk95VSqhY_yA4uGM1kbtMqWlTf_GFD4bZv9Uw7UzSXVMVMIC_dz8rnx_wnSkcF"/><div class="flex flex-col"><span class="font-title-sm text-title-sm text-on-surface">ScholarMatch</span><span class="font-label-sm text-label-sm text-on-surface-variant">Academic Portal</span></div></div><div class="px-space-md pt-space-md pb-space-xs"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Portal Navigation</span></div><nav class="flex flex-col gap-space-xs px-space-sm" data-active-classes="bg-primary-container text-on-primary font-title-sm rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-body-sm text-body-sm rounded-lg" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-primary-container text-on-primary font-title-sm rounded-lg" data-path="recommendations" href="#"><span class="material-symbols-outlined text-[20px]">auto_awesome</span><span>Recommendations</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-body-sm text-body-sm rounded-lg" data-path="saved-scholarships" href="#"><span class="material-symbols-outlined text-[20px]">bookmark</span><span>Saved Scholarships</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-body-sm text-body-sm rounded-lg" data-path="my-profile" href="#"><span class="material-symbols-outlined text-[20px]">account_circle</span><span>My Profile</span></a></nav></div><div class="p-space-md flex flex-col gap-space-md"><div class="p-space-md bg-surface-container-low rounded-lg flex flex-col gap-space-xs"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-secondary">Qualification Tier</span><span class="px-space-xs py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">Merit 95%</span></div><div class="font-metric-bold text-metric-bold text-on-surface">B40 Eligible</div></div><a class="flex items-center gap-space-sm px-space-md py-space-sm text-error hover:bg-error-container hover:text-on-error-container transition-colors font-body-sm text-body-sm rounded-lg" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Logout</span></a></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-gutter-lg"><div class="flex items-center gap-space-md"><img alt="ScholarMatch Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvNbKy-i44uC85O-R6iCU3nDE6_9VlEb1gaE2Umdamyr4Aap5p2lXOA__IV7C540FjKxSIpCYHhmKeNY0UZCoblwnGUySv_adBlU3urZo5PZkxmvHkFuCo2m0A015OQSSQBjZE3KliBOdLQRlcSQxAWy1IebeGcmQAlQ7-P-k5LTkvIk1cFsYpjRwxmNHk95VSqhY_yA4uGM1kbtMqWlTf_GFD4bZv9Uw7UzSXVMVMIC_dz8rnx_wnSkcF"/><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">Student Portal</span><span class="material-symbols-outlined text-[16px]">chevron_right</span><span class="text-on-surface font-title-sm text-title-sm">Academic Decision Support</span></div><div class="relative ml-space-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span><input class="h-9 pl-9 pr-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary w-64" placeholder="Search grants, donors, criteria..." type="text"/></div></div><div class="flex items-center gap-space-md"><button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span></button><div class="flex items-center gap-space-sm pl-space-sm bg-surface-container-low py-1 pr-space-md rounded-full shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-title-sm text-title-sm">A</div><div class="flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface leading-tight">Aina Binti Razak</span><div class="flex items-center gap-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant">Diploma</span><span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-tertiary text-on-tertiary font-label-sm text-[10px]">CGPA 3.80</span></div></div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface px-gutter-lg pb-space-xl"><div class="flex flex-col w-full">
+<!-- Page Context & Academic Anchor -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-lg">
+<div class="flex flex-col max-w-3xl">
+<div class="flex items-center gap-space-xs text-primary font-label-sm text-label-sm uppercase tracking-wider mb-1">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Verified Profile Matching Engine</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Scholarship Recommendations</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+        Matched against your <span class="font-title-sm text-title-sm text-on-surface">Diploma in Computer Science</span> (<span class="font-metric-bold text-metric-bold text-tertiary">CGPA 3.80/4.00</span>) and planned Bachelor's degree matriculation.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-lowest p-2 px-space-md rounded-xl shadow-sm border-0">
+<div class="flex flex-col text-right">
+<span class="font-label-sm text-label-sm text-secondary">Decision Dataset</span>
+<span class="font-title-sm text-title-sm text-on-surface">Updated Today, 08:30 MYT</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">sync</span>
+</div>
+</div>
+</div>
+<!-- Educational System Logic Notice -->
+<div class="relative overflow-hidden bg-surface-container-lowest rounded-xl p-space-md mb-space-lg shadow-sm">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-container"></div>
+<div class="flex items-start gap-space-md pl-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary-container shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">info</span>
+</div>
+<div class="flex flex-col gap-1 text-on-surface">
+<div class="flex items-center gap-2">
+<span class="font-title-sm text-title-sm text-on-surface">Deterministic Ranking Standard</span>
+<span class="text-[11px] font-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-medium">Merit Transparency</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Within <span class="text-tertiary font-metric-bold">Eligible</span> grants, positions prioritize verified positive margin over the academic baseline cutoff. Opportunities with equal margins or holistic assessment are ordered chronologically by closest submission deadline.
+        </p>
+</div>
+</div>
+</div>
+<!-- Advanced Exploration Toolbar -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md mb-space-lg">
+<!-- Primary Search & Rapid Presets -->
+<div class="flex flex-col lg:flex-row gap-space-md items-stretch lg:items-center justify-between">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full h-11 pl-11 pr-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container" placeholder="Search scholarship name, provider, or field..." type="text" value="Computing & Information Technology"/>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-label-md text-label-md text-secondary shrink-0">Sort criteria:</span>
+<div class="relative inline-block">
+<button class="h-11 px-space-md rounded-lg bg-surface-container-low text-on-surface font-title-sm text-title-sm flex items-center gap-space-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px] text-primary">sort</span>
+<span>Academic Margin: Highest First</span>
+<span class="material-symbols-outlined text-[18px] text-outline">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Micro-filter Array -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-secondary">Qualification Status</label>
+<button class="h-9 px-space-sm rounded-lg bg-surface-container-low text-on-surface text-left font-body-sm text-body-sm flex items-center justify-between">
+<span class="truncate">All Statuses</span>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-secondary">Study Discipline</label>
+<button class="h-9 px-space-sm rounded-lg bg-surface-container-low text-on-surface text-left font-body-sm text-body-sm flex items-center justify-between">
+<span class="truncate">Computing & IT</span>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-secondary">Provider Structure</label>
+<button class="h-9 px-space-sm rounded-lg bg-surface-container-low text-on-surface text-left font-body-sm text-body-sm flex items-center justify-between">
+<span class="truncate">GLC & Corporate</span>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-secondary">Degree Level</label>
+<button class="h-9 px-space-sm rounded-lg bg-surface-container-low text-on-surface text-left font-body-sm text-body-sm flex items-center justify-between">
+<span class="truncate">Bachelor's Degree</span>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-secondary">Institution</label>
+<button class="h-9 px-space-sm rounded-lg bg-surface-container-low text-on-surface text-left font-body-sm text-body-sm flex items-center justify-between">
+<span class="truncate">Public (IPTA)</span>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-secondary">Saved Records</label>
+<button class="h-9 px-space-sm rounded-lg bg-surface-container-low text-on-surface text-left font-body-sm text-body-sm flex items-center justify-between">
+<span class="truncate">All Records</span>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<!-- Active Tag Matrix & Metrics Header -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary mr-1">Active filters:</span>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span>Eligibility: All</span>
+<span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-error">close</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span>Funding: Bachelor's</span>
+<span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-error">close</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span>Status: Open</span>
+<span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-error">close</span>
+</span>
+<button class="text-primary hover:text-primary-container font-label-sm text-label-sm ml-space-xs transition-colors">
+          Clear all filters
+        </button>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-metric-bold text-metric-bold text-on-surface">Showing 24 matching opportunities</span>
+</div>
+</div>
+</div>
+<!-- Cards Collection -->
+<div class="flex flex-col gap-space-md">
+<!-- CARD 1: Yayasan Sime Darby (Top Performer, High Margin) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-space-md">
+<!-- Left Spine: Identity and Sponsor -->
+<div class="flex items-start gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-contain p-2" data-alt="Official corporate logo emblem of Yayasan Sime Darby, clean vector badge against a soft gray backdrop representing Malaysian academic sponsorship" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZUUL61N6UjHN0o83ocw8f3GX17AX80rTNJkYLBdHk35jDV6wo3U2fTZNEYo4uCSamG9JI5P0YhACyejspp-img1CHdnjf7r1-d40JpdUHgnzJRMymR7yBMMDqlWu0VOoy60vLunrEtJLFmglgM0FT-T1x7zpSjypzkWwlAVGrLSA8mYp1mNh2udPZTFacWqaF6kGBG_Y29xxx43MxcV4YIMGCqZt8HFnH4zLElJiM2rMEg6YNu0X5Ow"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary">Yayasan Sime Darby</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-secondary">Corporate Foundation</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface hover:text-primary cursor-pointer transition-colors mt-0.5">
+              Yayasan Sime Darby Excellence Scholarship (Undergraduate)
+            </h2>
+<div class="flex items-center gap-space-sm mt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">payments</span>
+<span class="font-metric-bold text-on-surface">Full Tuition + RM 1,200 Monthly Stipend + Book Allowance</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Right Spine: Qualification & Margin Badges -->
+<div class="flex flex-row lg:flex-col items-end lg:items-end justify-between lg:justify-start gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Eligible</span>
+</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+26.7% above academic minimum</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">Diploma CGPA 3.80 vs 3.00 required</span>
+</div>
+</div>
+<!-- Criteria Chips Grid -->
+<div class="bg-surface-container-low/60 rounded-lg p-space-sm flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary mr-space-xs">Requirements Check:</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Malaysian Citizen</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Age ≤ 25</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Enrolling in STEM/IT</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-outline">horizontal_rule</span>
+<span>N/A: Household Income Limit Unrestricted</span>
+</span>
+</div>
+<!-- Action Footer -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="flex items-center gap-1 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-secondary">calendar_today</span>
+<span>Deadline: <strong class="font-title-sm text-title-sm">15 July 2025</strong></span>
+<span class="text-secondary">(48 days left)</span>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Open</span>
+</div>
+<div class="flex items-center gap-space-sm justify-end">
+<button class="h-9 px-space-md rounded-lg bg-surface-container-high text-primary flex items-center gap-1.5 font-label-md text-label-md transition-colors hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+<span>Saved</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
+            View Details
+          </button>
+<button class="h-9 px-space-md rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors font-label-md text-label-md flex items-center gap-1">
+<span>Apply on Provider Site</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 2: Yayasan Khazanah (Competitive, Moderate Margin) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-contain p-2" data-alt="Official corporate crest of Yayasan Khazanah Malaysia, representing prestigious sovereign wealth educational scholarships" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJTdBPfblxPM2TfpQxpYGCSNGGCLkJQ8Xq3524qFlAbpSsCg_eBVKD_sYzdhTURhwchHRFPhiFjqWxekPj6URScR6aK4iLQz_iVI0PMWVmFAZ4t0gFVZWJU-AM6XfB-r1-q6mENK_xdGUDPSBE-WYrDtkQXZCC0UJ7BA4O66fYKLpCN9ESGqjmrC8TMZGutIfEbRnDnPy0lBwzjwtp3YccLgbsG7akdnbF8-FafOv07-6J5hW3QHeu9w"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary">Yayasan Khazanah</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-secondary">GLC Foundation</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface hover:text-primary cursor-pointer transition-colors mt-0.5">
+              Khazanah Global Scholarship 2025
+            </h2>
+<div class="flex items-center gap-space-sm mt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">payments</span>
+<span class="font-metric-bold text-on-surface">Full sponsorship at premier universities including living allowances</span>
+</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row lg:flex-col items-end lg:items-end justify-between lg:justify-start gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Eligible</span>
+</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+8.6% above academic minimum</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">Diploma CGPA 3.80 vs 3.50 required</span>
+</div>
+</div>
+<div class="bg-surface-container-low/60 rounded-lg p-space-sm flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary mr-space-xs">Requirements Check:</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: CGPA ≥ 3.50</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Malaysian Citizen</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Bachelor's Level Target</span>
+</span>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="flex items-center gap-1 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-secondary">calendar_today</span>
+<span>Deadline: <strong class="font-title-sm text-title-sm">30 June 2025</strong></span>
+<span class="text-secondary">(33 days left)</span>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Open</span>
+</div>
+<div class="flex items-center gap-space-sm justify-end">
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span>
+<span>Save</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
+            View Details
+          </button>
+<button class="h-9 px-space-md rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors font-label-md text-label-md flex items-center gap-1">
+<span>Apply on Provider Site</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 3: Gamuda Berhad (Holistic, No GPA Minimum) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-contain p-2" data-alt="Corporate logo of Gamuda Berhad engineering firm, symbolizing infrastructure, technology, and building tomorrow initiatives" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3LHYYvQ_hKUun4_84_xTY2ok-mjd3tatv9u3P9tvkR1HXrqv7Z6C7YDVM2T9fynoo3nU3CTX6C5gKTWnDXIrwjytaOU1rzK7AMtHCEdKt-kxus4_Z5_iFmHzzkbLCn9B9bSivZ4Qvb9licPw3NcsoYN3G-PnS-xChzIEKMte6MKH_oW1qE6cG15ZS_XtsetvlkaPXIG4lqve8ZQbmECj5Hkwvnjji9H8eQPFuzGHmy6eeTu29XwredA"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary">Gamuda Berhad</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-secondary">Public Listed Entity</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface hover:text-primary cursor-pointer transition-colors mt-0.5">
+              Gamuda Scholarship — Building Tomorrow
+            </h2>
+<div class="flex items-center gap-space-sm mt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">payments</span>
+<span class="font-metric-bold text-on-surface">Full tuition + internship placement + career mentorship</span>
+</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row lg:flex-col items-end lg:items-end justify-between lg:justify-start gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Eligible</span>
+</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+<span>N/A (No GPA minimum specified)</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">Holistic leadership evaluation</span>
+</div>
+</div>
+<div class="bg-surface-container-low/60 rounded-lg p-space-sm flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary mr-space-xs">Requirements Check:</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Malaysian Citizen</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Engineering & Computing Track</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-outline">check</span>
+<span>N/A: Academic Minimum Discretionary</span>
+</span>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="flex items-center gap-1 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-secondary">calendar_today</span>
+<span>Deadline: <strong class="font-title-sm text-title-sm">22 August 2025</strong></span>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Open</span>
+</div>
+<div class="flex items-center gap-space-sm justify-end">
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span>
+<span>Save</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
+            View Details
+          </button>
+<button class="h-9 px-space-md rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors font-label-md text-label-md flex items-center gap-1">
+<span>Apply on Provider Site</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 4: PETRONAS (Needs Income Profile Input) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-contain p-2" data-alt="PETRONAS emerald logo emblem, national energy corporation education grant marker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOpdaGPwZzB08Yp7pr-hSihof3MjJ67nb9UdofsNjq9QOem1ftHSxJNYDZfhasrA3cFuNNqNhV9UWlSaoC2IS-zTBMRHDpL5nDmo7jwyQG5dh4reGhHaZ3p04l9-5wx6D73KmUwH0MzF_HvlI0rZ0lW_jv46B_PTMXvgqqeb9BhHPIiQnLzNOv9sjOlNzZezIjqVJjuA-KHIy_XZIhicEdTK943S3TeBJWc7bcWQDksxaRGwAIz40c8g"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary">Yayasan PETRONAS</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-secondary">National Energy GLC</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface hover:text-primary cursor-pointer transition-colors mt-0.5">
+              PETRONAS Education Sponsorship Programme (PESP)
+            </h2>
+<div class="flex items-center gap-space-sm mt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">payments</span>
+<span class="font-metric-bold text-on-surface">Full academic tuition fees, laptop subsidy, and monthly living aid</span>
+</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row lg:flex-col items-end lg:items-end justify-between lg:justify-start gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-fixed font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span>Manual Verification Required</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary">Financial Tier Undetermined</span>
+</div>
+</div>
+<!-- Verification Alert Banner -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-[20px]">warning</span>
+<span class="font-body-sm text-body-sm text-on-surface">
+<strong>1 item needs verification:</strong> Please update your Household Gross Income in My Profile to check B40/M40 income threshold criteria.
+        </span>
+</div>
+<!-- Requirements Matrix with Missing Indicator -->
+<div class="bg-surface-container-low/60 rounded-lg p-space-sm flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary mr-space-xs">Requirements Check:</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Academic Route</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Malaysian Citizen</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-primary">pending_actions</span>
+<span>Manual Verification Required: Household Income < RM 8,000</span>
+</span>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="flex items-center gap-1 font-body-sm text-body-sm text-error">
+<span class="material-symbols-outlined text-[18px]">alarm</span>
+<span>Deadline: <strong class="font-title-sm text-title-sm">28 May 2025</strong></span>
+<span class="font-metric-bold text-metric-bold">(Closing in 4 days!)</span>
+</span>
+</div>
+<div class="flex items-center gap-space-sm justify-end">
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
+            View Details
+          </button>
+<button class="h-9 px-space-md rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+<span>Update Profile to Check</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 5: Axiata (Not Eligible Example) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md transition-shadow hover:shadow-md opacity-90">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-surface-container-low shrink-0 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-contain p-2" data-alt="Official Axiata Foundation symbol, minimalist telecom blue branding pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMVUeOP5MRvBfkK6whlcs6-mfvH0TvRyZs-uDRFttMaeuzUB3kFEA2sH3JXYW7fV1MPyEg1bMv6-lDr2Q6yzMs21Zhsiubvd3LH8Xei1WHAmjO2nVhGYN7b7LrOhFLysKNyMPsqzTaVu2wdQEf4NL12qgxwMqiPVMboR-TRWFcKyZPQaoArPOD1JDfBb1GNLaOUIa5LIb4-DmgEw0OSy6XhdPQ3yXP6Az-ZofWBo8Y7aP6TEfBezKYcw"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary">Axiata Foundation</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-secondary">Telecommunication Conglomerate</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface hover:text-primary cursor-pointer transition-colors mt-0.5">
+              Axiata Foundation All-Star Scholarship
+            </h2>
+<div class="flex items-center gap-space-sm mt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span>Full international tuition, airfare, and housing for overseas STEM degrees</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row lg:flex-col items-end lg:items-end justify-between lg:justify-start gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Not Eligible</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary">Location Mismatch</span>
+</div>
+</div>
+<!-- Ineligibility Reason Callout -->
+<div class="bg-error-container/40 p-space-sm rounded-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-error text-[20px]">block</span>
+<span class="font-body-sm text-body-sm text-on-surface">
+<strong class="text-error">Not Met:</strong> Restricted to students pursuing studies at overseas universities. Your profile indicates local IPTA/IPTS enrolment.
+        </span>
+</div>
+<!-- Requirements Breakdown -->
+<div class="bg-surface-container-low/60 rounded-lg p-space-sm flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary mr-space-xs">Requirements Check:</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span>Met: Academic CGPA</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-error-container/50 text-error font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px]">close</span>
+<span>Not Met: Overseas Institution Only</span>
+</span>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="flex items-center gap-1 font-body-sm text-body-sm text-secondary">
+<span class="material-symbols-outlined text-[18px]">event_busy</span>
+<span>Deadline: 14 September 2025</span>
+</span>
+</div>
+<div class="flex items-center gap-space-sm justify-end">
+<button class="h-9 px-space-md rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
+            View Requirement Breakdown
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Systematic Pagination Bar -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm mt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-secondary">Showing</span>
+<select class="h-8 px-2 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none">
+<option>5 records per page</option>
+<option selected="">10 records per page</option>
+<option>25 records per page</option>
+</select>
+<span class="font-label-sm text-label-sm text-secondary">of 24 matching grants</span>
+</div>
+<!-- Pager Numbers -->
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center hover:bg-surface-container-high transition-colors" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary-container text-on-primary font-metric-bold text-metric-bold flex items-center justify-center">
+        1
+      </button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center hover:bg-surface-container transition-colors">
+        2
+      </button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center justify-center hover:bg-surface-container transition-colors">
+        3
+      </button>
+<button class="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div></main></div></body></html>
