@@ -39,7 +39,11 @@ class ScholarshipController extends Controller
     {
         $s->load(['requirements', 'academicRoutes', 'studyFields', 'incomeCategories']);
 
-        return view('admin.scholarships.form', ['scholarship' => $s, 'fields' => StudyField::where('is_active', true)->orWhereIn('id', $s->studyFields->pluck('id'))->orderBy('name')->get(), 'categories' => IncomeCategory::where('is_active', true)->orderByDesc('reference_year')->orderBy('minimum')->get()]);
+        $incomeRule = $s->requirements?->criteria['income'] ?? [];
+        $incomeReferenceYear = ($incomeRule['mode'] ?? '') === 'restricted' && ($incomeRule['kind'] ?? '') === 'categories' ? ($incomeRule['reference_year'] ?? null) : null;
+        $incomeReferenceYear ??= IncomeCategory::where('is_active', true)->max('reference_year');
+
+        return view('admin.scholarships.form', ['scholarship' => $s, 'fields' => StudyField::where('is_active', true)->orWhereIn('id', $s->studyFields->pluck('id'))->orderBy('name')->get(), 'categories' => IncomeCategory::where('is_active', true)->where('reference_year', $incomeReferenceYear)->orderBy('minimum')->get(), 'incomeReferenceYear' => $incomeReferenceYear]);
     }
 
     public function create(): View
@@ -65,8 +69,14 @@ class ScholarshipController extends Controller
     {
         $data = $request->validated();
         DB::transaction(function () use ($request, $s, $data) {
-            $basic = collect($data)->except(['criteria', 'academic_routes'])->all();
-            $basic['closing_at'] = empty($basic['closing_at']) ? null : CarbonImmutable::parse($basic['closing_at'], 'Asia/Kuala_Lumpur')->utc()->format('Y-m-d H:i:s');
+            $basic = collect($data)->except(['criteria', 'academic_routes', 'scholarship_url', 'income_requirement', 'automatic_criteria', 'preserve_income_rule', 'manual_requirements'])->all();
+            $basic['description'] = $basic['description'] ?? '';
+            $basic['benefits'] = $request->boolean('automatic_criteria') ? '' : ($basic['benefits'] ?? '');
+            if (array_key_exists('closing_at', $basic)) {
+                $basic['closing_at'] = empty($basic['closing_at']) ? null : CarbonImmutable::parse($basic['closing_at'], 'Asia/Kuala_Lumpur')->utc()->format('Y-m-d H:i:s');
+            } elseif ($s->exists && $basic['deadline'] !== $s->deadline->format('Y-m-d')) {
+                $basic['closing_at'] = null;
+            }
             $basic['is_fictional'] = $request->boolean('is_fictional');
             $basic['verified_by'] = $basic['source_status'] === 'reviewed' ? $request->user()->id : null;
             $basic['last_verified_at'] = $basic['source_status'] === 'reviewed' ? now() : null;

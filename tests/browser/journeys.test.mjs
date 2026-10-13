@@ -57,12 +57,52 @@ test('add and remove qualification controls persist a validated profile',async t
  const page=await pageFor(t);await page.goto(base+'/profile');const original=await page.locator('.academic-row').count();
  await page.getByRole('button',{name:'Add Qualification'}).click();const added=page.locator('.academic-row').last();
  await added.getByLabel('Qualification',{exact:true}).selectOption('Foundation');await added.getByLabel('Completion status').selectOption('completed');
- await added.getByLabel('Result type').selectOption('cgpa');await added.getByLabel('Result value',{exact:false}).fill('3.75');await added.getByLabel('Grading scale maximum').fill('4');
+ assert.equal(await page.locator('[name$="[grading_scale]"]').count(),0);
+ await added.getByLabel('Result type').selectOption('cgpa');
+ const result=added.getByLabel('CGPA (out of 4.00)',{exact:true});
+ await result.fill('4.01');assert.ok(await result.evaluate(input=>input.validity.rangeOverflow));
+ await added.getByLabel('Result type').selectOption('as_count');
+ await added.getByLabel('Number of As',{exact:true}).fill('8');
+ assert.ok(await added.getByLabel('Number of As',{exact:true}).evaluate(input=>input.validity.valid));
+ await added.getByLabel('Result type').selectOption('cgpa');await result.fill('3.75');
  await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Save profile'}).click()]);
  assert.equal(await page.locator('.academic-row').count(),original+1);assert.ok(await page.getByRole('status').isVisible());
+ assert.equal(Number(await page.locator('.academic-row').last().getByLabel('CGPA (out of 4.00)',{exact:true}).inputValue()),3.75);
+ assert.equal(await page.locator('[name$="[grading_scale]"]').count(),0);
  await page.locator('.academic-row').last().getByRole('button',{name:'Remove qualification'}).click();
  await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Save profile'}).click()]);
  assert.equal(await page.locator('.academic-row').count(),original);
+});
+
+test('admin CGPA uses a fixed four point scale and As need no scale input',async t=>{
+ const page=await pageFor(t,'admin@scholarmatch.test');
+ await page.goto(base+'/admin/scholarships/1/edit');
+ const cgpaRoute=page.locator('.route-row').filter({has:page.getByLabel('Minimum CGPA (out of 4.00)',{exact:true})});
+ const asRoute=page.locator('.route-row').filter({has:page.getByLabel('Minimum number of As',{exact:true})});
+ assert.equal(await page.locator('[name$="[grading_scale]"]').count(),0);
+ const cgpa=cgpaRoute.getByLabel('Minimum CGPA (out of 4.00)',{exact:true});
+ await cgpa.fill('4.01');assert.ok(await cgpa.evaluate(input=>input.validity.rangeOverflow));
+ await cgpa.fill('3.25');
+ await asRoute.getByLabel('Minimum number of As',{exact:true}).fill('8');
+ assert.ok(await asRoute.getByLabel('Minimum number of As',{exact:true}).evaluate(input=>input.validity.valid));
+ await page.getByRole('button',{name:'Add academic route'}).click();
+ const added=page.locator('.route-row').last();
+ await added.getByLabel('Result type').selectOption('cgpa');
+ assert.equal(await added.getByLabel('Minimum CGPA (out of 4.00)',{exact:true}).getAttribute('max'),'4');
+ await added.getByLabel('Result type').selectOption('as_count');
+ assert.equal(await added.getByLabel('Minimum number of As',{exact:true}).getAttribute('step'),'1');
+ await added.getByRole('button',{name:'Remove route'}).click();
+ for(const width of [1440,390,320]){
+  await page.setViewportSize({width,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Academic route must fit ${width}px`);
+  if(width!==320)await cgpaRoute.screenshot({path:`artifacts/cgpa-admin-${width===1440?'desktop':'mobile'}.png`});
+ }
+ await page.setViewportSize({width:1440,height:1000});
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Save scholarship',exact:true}).click()]);
+ assert.match(await page.getByRole('status').innerText(),/Scholarship updated/);
+ await page.goto(base+'/admin/scholarships/1/edit');
+ assert.equal(Number(await cgpaRoute.getByLabel('Minimum CGPA (out of 4.00)',{exact:true}).inputValue()),3.25);
+ assert.equal(await page.locator('[name$="[grading_scale]"]').count(),0);
 });
 test('mobile menu works and principal student pages do not overflow',async t=>{
  const page=await pageFor(t,'student1@scholarmatch.test',{width:390,height:844});
@@ -84,6 +124,95 @@ test('admin scholarship route controls, reference rows and validation are usable
  await page.locator('.income-row').last().getByRole('button',{name:'Remove',exact:true}).click();assert.equal(await page.locator('.income-row').count(),initial);
  await page.getByRole('link',{name:'Study Fields',exact:true}).click();await page.getByLabel('New field name').fill('Demo Browser Field');
  await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Add field',exact:true}).click()]);assert.match(await page.getByRole('status').innerText(),/Study field added/);
+});
+
+test('simplified scholarship form infers restrictions and shows separate manual requirements to students',async t=>{
+ const page=await pageFor(t,'admin@scholarmatch.test');
+ await page.goto(base+'/admin/scholarships/create');
+ const basic=page.locator('.panel').filter({has:page.getByRole('heading',{name:'Basic information',exact:true})});
+ const income=page.locator('[data-income-form]');
+ assert.equal(await basic.locator('input:not([type=hidden])').count(),4);
+ assert.equal(await basic.getByLabel('Scholarship description *',{exact:true}).evaluate(element=>element.tagName),'TEXTAREA');
+ assert.equal(await basic.locator('[name=benefits]').count(),0);
+ assert.equal(await basic.locator('[name=description]').count(),1);
+ assert.equal(await page.locator('select[name$="[mode]"]').count(),0);
+ assert.equal(await page.locator('[name="income_requirement"]').count(),0);
+ assert.ok(await income.locator('fieldset').isVisible());
+ assert.match(await income.innerText(),/Using configured categories for 2026/);
+ assert.equal(await income.locator('input[type=number]').count(),0);
+ assert.equal(await income.locator('input[type=checkbox]').first().evaluate(input=>input.validity.valid),true);
+ await income.locator('input[type=checkbox]').first().check();
+ assert.equal(await income.locator('input[type=checkbox]').first().evaluate(input=>input.validity.valid),true);
+ await basic.getByLabel('Scholarship name *',{exact:true}).fill('Demo Simple Form Award');
+ await basic.getByLabel('Provider *',{exact:true}).fill('Demo Provider');
+ await basic.getByLabel('Scholarship description *',{exact:true}).fill('Supports undergraduate students with tuition fees and a monthly allowance.');
+ await basic.getByLabel('Application deadline *',{exact:true}).fill('2027-01-31');
+ await basic.getByLabel('Official scholarship link *',{exact:true}).fill('https://example.test/simple-award');
+ const manualNote='Applicants must show leadership experience and pass an interview.';
+ await page.getByText('Special requirements (manual verification, optional)',{exact:true}).click();
+ await page.getByLabel('Requirements to verify with the provider',{exact:true}).fill(manualNote);
+ await page.getByLabel('Source verification',{exact:true}).selectOption('reviewed');
+ await page.getByLabel('Application status',{exact:true}).selectOption('open');
+ for(const width of [1440,390,320]){
+  await page.setViewportSize({width,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Scholarship form must fit ${width}px`);
+  if(width!==320){
+   await basic.screenshot({path:`artifacts/scholarship-basic-${width===1440?'desktop':'mobile'}.png`});
+   await income.locator('..').screenshot({path:`artifacts/scholarship-income-${width===1440?'desktop':'mobile'}.png`});
+  }
+ }
+ await page.setViewportSize({width:1440,height:1000});
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Save scholarship',exact:true}).click()]);
+ assert.match(await page.getByRole('status').innerText(),/Scholarship saved/);
+ const studentPage=await pageFor(t);
+ await studentPage.goto(base+'/recommendations?search=Demo%20Simple%20Form%20Award');
+ const alert=studentPage.locator('.manual-requirements-alert');
+ assert.equal(await alert.count(),1);
+ assert.ok(await studentPage.getByText('Description',{exact:true}).isVisible());
+ assert.equal(await studentPage.getByText('Benefits',{exact:true}).count(),0);
+ assert.match(await alert.innerText(),/leadership experience and pass an interview/);
+ for(const width of [1440,390,320]){
+  await studentPage.setViewportSize({width,height:1000});
+  assert.ok(await studentPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Special requirements must fit ${width}px`);
+  if(width!==320)await alert.screenshot({path:`artifacts/manual-alert-${width===1440?'desktop':'mobile'}.png`});
+ }
+ await studentPage.setViewportSize({width:1440,height:1000});
+ await studentPage.getByRole('link',{name:'View Details',exact:false}).click();
+ assert.equal((await studentPage.locator('.value-strip-single').evaluate(element=>getComputedStyle(element).gridTemplateColumns)).split(' ').length,1);
+ assert.match(await alert.innerText(),/leadership experience/);
+ await page.getByRole('row').filter({hasText:'Demo Simple Form Award'}).getByRole('link',{name:'Edit',exact:true}).click();
+ assert.equal(await basic.getByLabel('Official scholarship link *',{exact:true}).inputValue(),'https://example.test/simple-award');
+ assert.equal(await income.locator('input[type=checkbox]').first().isChecked(),true);
+ assert.equal(await page.getByLabel('Requirements to verify with the provider',{exact:true}).inputValue(),manualNote);
+ await income.locator('input[type=checkbox]').first().uncheck();
+ await page.getByLabel('Requirements to verify with the provider',{exact:true}).fill('');
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Save scholarship',exact:true}).click()]);
+ assert.match(await page.getByRole('status').innerText(),/Scholarship updated/);
+ await page.getByRole('row').filter({hasText:'Demo Simple Form Award'}).getByRole('link',{name:'Edit',exact:true}).click();
+ assert.equal(await income.locator('input[type=checkbox]:checked').count(),0);
+ await studentPage.reload();
+ assert.equal(await alert.count(),0);
+ assert.ok(await studentPage.locator('.status-badge.eligible').isVisible());
+});
+
+test('common study fields and Malaysian residence choices are available on both forms',async t=>{
+ const page=await pageFor(t);
+ await page.goto(base+'/profile');
+ const residence=page.getByLabel('State / federal territory of residence',{exact:true});
+ const options=await residence.locator('option:not([value=""])').allTextContents();
+ assert.equal(options.length,16);
+ for(const name of ['Pulau Pinang (Penang)','Kuala Lumpur','Labuan','Putrajaya'])assert.ok(options.includes(name));
+ const fields=await page.getByLabel('Study field',{exact:true}).locator('option').allTextContents();
+ for(const name of ['Software Engineering','Accounting','Law','Nursing','Education'])assert.ok(fields.includes(name));
+ const admin=await pageFor(t,'admin@scholarmatch.test');
+ await admin.goto(base+'/admin/scholarships/create');
+ for(const name of ['Software Engineering','Accounting','Law','Nursing','Education'])assert.ok(await admin.getByLabel(name,{exact:true}).isVisible());
+ assert.equal(await admin.locator('input[name="criteria[residence_state][values][]"]').count(),16);
+ for(const width of [1440,390,320]){
+  await page.setViewportSize({width,height:1000});await admin.setViewportSize({width,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert.ok(await admin.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ }
 });
 test('academic pathways are clear and fit desktop and small phone cards',async t=>{
  const page=await pageFor(t);await page.goto(base+'/recommendations');

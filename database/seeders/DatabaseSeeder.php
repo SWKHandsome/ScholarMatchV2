@@ -16,15 +16,16 @@ class DatabaseSeeder extends Seeder
         if (app()->isProduction()) {
             throw new \RuntimeException('Fictional demo accounts must not be seeded into production.');
         }
+        $this->call(StudyFieldSeeder::class);
         DB::transaction(function () {
             $admin = User::updateOrCreate(['email' => 'admin@scholarmatch.test'], ['name' => 'Demo Administrator', 'role' => 'admin', 'is_active' => true, 'password' => 'Demo!123456']);
-            $fields = collect(['Computer Science', 'Engineering', 'Business', 'Medicine', 'Arts & Humanities'])->map(fn ($name) => StudyField::firstOrCreate(['name' => $name], ['is_active' => true]));
+            $computerScience = StudyField::where('name', 'Computer Science')->firstOrFail();
             foreach ([['B40', 0, 4999.99], ['M40', 5000, 9999.99], ['T20', 10000, null]] as [$name,$minimum,$maximum]) {
                 IncomeCategory::updateOrCreate(['name' => $name, 'reference_year' => 2026], ['minimum' => $minimum, 'maximum' => $maximum, 'source_url' => 'https://example.org/fictional-income-ranges', 'is_active' => true]);
             }
             for ($i = 1; $i <= 10; $i++) {
                 $user = User::updateOrCreate(['email' => 'student'.$i.'@scholarmatch.test'], ['name' => $i === 1 ? 'Aina Binti Razak' : 'Demo Student '.$i, 'role' => 'student', 'password' => 'Demo!123456', 'is_active' => true]);
-                $profile = $user->profile()->updateOrCreate([], ['citizenship' => $i === 9 ? 'Non-Malaysian' : 'Malaysian', 'residence_state' => 'Selangor', 'current_education_level' => 'diploma', 'funding_level' => 'bachelor', 'study_field_id' => $fields[0]->id, 'study_field_undecided' => false, 'enrolment_status' => $i % 3 === 0 ? 'enrolled' : 'planning', 'institution_type' => 'public_university', 'study_location' => 'Malaysia', 'household_income' => $i === 10 ? null : ($i === 1 ? 3200 : $i * 1000), 'academic_records_complete' => $i !== 10]);
+                $profile = $user->profile()->updateOrCreate([], ['citizenship' => $i === 9 ? 'Non-Malaysian' : 'Malaysian', 'residence_state' => 'Selangor', 'current_education_level' => 'diploma', 'funding_level' => 'bachelor', 'study_field_id' => $computerScience->id, 'study_field_undecided' => false, 'enrolment_status' => $i % 3 === 0 ? 'enrolled' : 'planning', 'institution_type' => 'public_university', 'study_location' => 'Malaysia', 'household_income' => $i === 10 ? null : ($i === 1 ? 3200 : $i * 1000), 'academic_records_complete' => $i !== 10]);
                 $profile->academicRecords()->delete();
                 $profile->academicRecords()->createMany([
                     ['qualification' => 'SPM', 'completion_status' => 'completed', 'result_type' => 'as_count', 'result_value' => 7, 'grading_scale' => 10, 'completion_year' => 2023],

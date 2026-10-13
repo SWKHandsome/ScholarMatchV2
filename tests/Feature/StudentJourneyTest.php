@@ -21,6 +21,37 @@ class StudentJourneyTest extends TestCase
         return User::findOrFail($p->user_id);
     }
 
+    public function test_description_replaces_benefits_in_cards_and_preserves_existing_funding_details(): void
+    {
+        $scholarship = Scholarship::factory()->create(['description' => 'Supports Malaysian undergraduate students.', 'benefits' => 'Full tuition and monthly allowance.']);
+        $this->actingAs($this->student())->get('/recommendations')->assertOk()->assertSee('<small>Description</small>', false)->assertSee('Supports Malaysian undergraduate students.')->assertSee('Full tuition and monthly allowance.')->assertDontSee('<small>Benefits</small>', false);
+        $this->get('/scholarships/'.$scholarship->id)->assertOk()->assertSee('Supports Malaysian undergraduate students.')->assertSee('Full tuition and monthly allowance.')->assertDontSee('<small>Benefits</small>', false);
+    }
+
+    public function test_special_requirements_show_an_escaped_alert_in_cards_and_details_and_require_verification(): void
+    {
+        $student = $this->student();
+        $scholarship = Scholarship::factory()->create();
+        $note = 'Leadership experience required. <script>alert("manual")</script>';
+        $criteria = $scholarship->requirements->criteria;
+        $criteria['additional'] = ['mode' => 'manual', 'notes' => $note];
+        $scholarship->requirements->update(['criteria' => $criteria]);
+        $this->actingAs($student);
+        $student->savedScholarships()->attach($scholarship);
+
+        foreach (['/recommendations', '/saved', '/scholarships/'.$scholarship->id] as $page) {
+            $this->get($page)->assertOk()->assertSee('Manual verification required')->assertSee($note)->assertDontSee($note, false);
+        }
+        $this->get('/scholarships/'.$scholarship->id)->assertViewHas('evaluation', fn ($evaluation): bool => $evaluation->status->value === 'Manual Verification Required');
+        $criteria['citizenship'] = ['mode' => 'restricted', 'values' => ['Non-Malaysian']];
+        $scholarship->requirements->update(['criteria' => $criteria]);
+        $this->get('/scholarships/'.$scholarship->id)->assertViewHas('evaluation', fn ($evaluation): bool => $evaluation->status->value === 'Not Eligible');
+        $criteria['citizenship'] = ['mode' => 'none'];
+        $criteria['additional'] = ['mode' => 'none'];
+        $scholarship->requirements->update(['criteria' => $criteria]);
+        $this->get('/scholarships/'.$scholarship->id)->assertDontSee('manual-requirements-alert', false)->assertViewHas('evaluation', fn ($evaluation): bool => $evaluation->status->value === 'Eligible');
+    }
+
     public function test_dashboard_recommendations_details_and_recorded_application_link(): void
     {
         $u = $this->student();

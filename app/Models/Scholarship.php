@@ -41,6 +41,31 @@ class Scholarship extends Model
         return $this->belongsToMany(IncomeCategory::class, 'scholarship_income_categories');
     }
 
+    public function manualVerificationNotes(): string
+    {
+        $notes = [];
+        $criteria = $this->requirements?->criteria ?? [];
+        foreach (config('scholarmatch.criteria') as $key => $label) {
+            $criterion = $criteria[$key] ?? [];
+            if (($criterion['mode'] ?? '') === 'manual' && filled($criterion['notes'] ?? null)) {
+                $notes[] = ($key === 'additional' ? '' : $label.': ').$criterion['notes'];
+            }
+        }
+
+        return implode("\n", $notes);
+    }
+
+    public function fullDescription(): string
+    {
+        $description = trim($this->description ?? '');
+        $benefits = trim($this->benefits ?? '');
+        if ($benefits === '' || str_contains($description, $benefits)) {
+            return $description;
+        }
+
+        return $description === '' ? $benefits : $description."\n\n".$benefits;
+    }
+
     public function closingInstant(): CarbonImmutable
     {
         return $this->closing_at ? CarbonImmutable::parse($this->closing_at, 'UTC') : $this->deadline->setTimezone('Asia/Kuala_Lumpur')->endOfDay();

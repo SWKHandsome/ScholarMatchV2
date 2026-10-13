@@ -6,6 +6,7 @@ use App\Models\IncomeCategory;
 use App\Models\StudyField;
 use App\Models\User;
 use App\Services\IncomeCategoryResolver;
+use Database\Seeders\StudyFieldSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,6 +17,20 @@ class ReferenceDataTest extends TestCase
     private function configuration(): array
     {
         return ['reference_year' => 2026, 'source_url' => 'https://example.test/fictional-income', 'categories' => [['name' => 'B40', 'minimum' => '0', 'maximum' => '4999.99'], ['name' => 'M40', 'minimum' => '5000', 'maximum' => '9999.99'], ['name' => 'T20', 'minimum' => '10000', 'maximum' => null]]];
+    }
+
+    public function test_common_study_fields_are_added_without_duplicates_or_reactivating_existing_fields(): void
+    {
+        $engineering = StudyField::factory()->create(['name' => 'Engineering', 'is_active' => false]);
+        $this->seed(StudyFieldSeeder::class);
+        $ids = StudyField::orderBy('name')->pluck('id', 'name')->all();
+        $this->seed(StudyFieldSeeder::class);
+        $this->assertSame($ids, StudyField::orderBy('name')->pluck('id', 'name')->all());
+        $this->assertDatabaseCount('study_fields', 25);
+        $this->assertSame($engineering->id, StudyField::where('name', 'Engineering')->firstOrFail()->id);
+        $this->assertFalse($engineering->fresh()->is_active);
+        $this->actingAs(User::factory()->create())->get('/profile')->assertOk()->assertSee('Software Engineering')->assertSee('Accounting')->assertSee('Nursing')->assertSee('Law');
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->get('/admin/scholarships/create')->assertOk()->assertSee('Software Engineering')->assertSee('Accounting')->assertSee('Nursing')->assertSee('Law');
     }
 
     public function test_complete_income_configuration_and_boundary_resolution(): void

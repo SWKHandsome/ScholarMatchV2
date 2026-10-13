@@ -21,6 +21,47 @@ class ProfileTest extends TestCase
         ]];
     }
 
+    public function test_residence_options_cover_malaysia_and_reject_places_outside_it(): void
+    {
+        $this->assertSame(['Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Labuan', 'Putrajaya'], config('scholarmatch.residence_state'));
+        $user = User::factory()->create();
+        $this->actingAs($user)->get('/profile')->assertOk()->assertSee('State / federal territory of residence')->assertSee('Pulau Pinang (Penang)')->assertSee('Labuan')->assertSee('Putrajaya');
+        foreach (['Penang', 'Kuala Lumpur', 'Labuan', 'Putrajaya'] as $state) {
+            $this->put('/profile', ['residence_state' => $state])->assertSessionHasNoErrors()->assertRedirect();
+            $this->assertSame($state, $user->profile()->firstOrFail()->residence_state);
+        }
+        $this->put('/profile', ['residence_state' => 'Singapore'])->assertSessionHasErrors('residence_state');
+        $this->assertSame('Putrajaya', $user->profile()->firstOrFail()->residence_state);
+    }
+
+    public function test_cgpa_and_as_count_results_save_without_scale_inputs(): void
+    {
+        $user = User::factory()->create();
+        $data = $this->data();
+        unset($data['academic_records'][0]['grading_scale'], $data['academic_records'][1]['grading_scale']);
+
+        $this->actingAs($user)->put('/profile', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $records = $user->profile()->firstOrFail()->academicRecords;
+        $this->assertSame('4.0000', $records->firstWhere('result_type', 'cgpa')->grading_scale);
+        $this->assertSame('8.0000', $records->firstWhere('result_type', 'as_count')->result_value);
+        $this->assertNull($records->firstWhere('result_type', 'as_count')->grading_scale);
+        $this->get('/profile')->assertOk()->assertSee('CGPA (out of 4.00)')->assertDontSee('Grading scale maximum')->assertDontSee('[grading_scale]', false);
+    }
+
+    public function test_cgpa_cannot_exceed_four_even_when_a_different_scale_is_submitted(): void
+    {
+        $user = User::factory()->create();
+        $data = $this->data();
+        $data['academic_records'][1]['grading_scale'] = 5;
+        $data['academic_records'][1]['result_value'] = 4.01;
+
+        $this->actingAs($user)->put('/profile', $data)->assertSessionHasErrors('academic_records.1.result_value');
+        $this->assertDatabaseCount('student_academic_records', 0);
+        $data['academic_records'][1]['result_value'] = 4;
+        $this->put('/profile', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('4.0000', $user->profile()->firstOrFail()->academicRecords->firstWhere('result_type', 'cgpa')->grading_scale);
+    }
+
     public function test_profile_supports_multiple_qualifications_zero_income_and_intended_funding(): void
     {
         $user = User::factory()->create();

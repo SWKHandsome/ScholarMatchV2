@@ -19,6 +19,21 @@ class ProfileRequest extends FormRequest
         if ($this->has('academic_records') && ! $this->input('academic_records')) {
             $this->merge(['academic_records' => []]);
         }
+
+        $records = $this->input('academic_records');
+        if (is_array($records)) {
+            foreach ($records as $index => $record) {
+                if (! is_array($record)) {
+                    continue;
+                }
+                if (($record['result_type'] ?? '') === 'cgpa') {
+                    $records[$index]['grading_scale'] = 4;
+                } elseif (! array_key_exists('grading_scale', $record)) {
+                    $records[$index]['grading_scale'] = null;
+                }
+            }
+            $this->merge(['academic_records' => $records]);
+        }
     }
 
     public function rules(): array
@@ -67,14 +82,12 @@ class ProfileRequest extends FormRequest
                     $validator->errors()->add("academic_records.$index.id", 'This qualification does not belong to your profile.');
                 }
                 if (in_array($record['result_type'] ?? '', ['as_count', 'cgpa'])) {
-                    if (! isset($record['grading_scale'])) {
-                        $validator->errors()->add("academic_records.$index.grading_scale", 'Declare the grading scale.');
-                    }
-                    if (isset($record['result_value'],$record['grading_scale']) && (float) $record['result_value'] > (float) $record['grading_scale']) {
-                        $validator->errors()->add("academic_records.$index.result_value", 'The result cannot exceed the declared scale.');
+                    $maximum = $record['grading_scale'] ?? 30;
+                    if (isset($record['result_value']) && (float) $record['result_value'] > (float) $maximum) {
+                        $validator->errors()->add("academic_records.$index.result_value", $record['result_type'] === 'cgpa' ? 'CGPA cannot exceed 4.00.' : 'The number of As cannot exceed '.$maximum.'.');
                     }
                     if (($record['result_type'] ?? '') === 'as_count' && ((isset($record['result_value']) && (float) $record['result_value'] != (int) $record['result_value']) || (isset($record['grading_scale']) && (float) $record['grading_scale'] != (int) $record['grading_scale']))) {
-                        $validator->errors()->add("academic_records.$index.result_value", 'Counts of As and their scales must be whole numbers.');
+                        $validator->errors()->add("academic_records.$index.result_value", 'Counts of As must be whole numbers.');
                     }
                 }
             }

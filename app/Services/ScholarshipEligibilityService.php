@@ -76,7 +76,8 @@ class ScholarshipEligibilityService
         foreach ($records as $record) {
             $state = C::Met;
             $reason = 'Your recorded result meets the minimum and completion requirement.';
-            $student = $record->qualification.' · '.($record->result_value === null ? 'unknown result' : (float) $record->result_value).' / '.($record->grading_scale === null ? 'unknown scale' : (float) $record->grading_scale).' · '.$record->completion_status;
+            $result = $record->result_value === null ? 'unknown result' : (float) $record->result_value;
+            $student = $record->qualification.' · '.$result.($record->result_type === 'as_count' ? ($record->result_value === null ? '' : ' As') : ' / '.($record->grading_scale === null ? 'unknown scale' : (float) $record->grading_scale)).' · '.$record->completion_status;
             $completionFailure = $route->completion_status === 'completed' && $record->completion_status !== 'completed';
             $comparable = in_array($route->result_type, ['cgpa', 'as_count'], true) && $route->qualification !== 'Other' && $record->result_type === $route->result_type && $record->result_value !== null && $route->minimum !== null && ($route->result_type === 'as_count' || ($record->grading_scale !== null && $route->grading_scale !== null && (float) $record->grading_scale === (float) $route->grading_scale));
             if ($completionFailure || ($comparable && (float) $record->result_value < (float) $route->minimum)) {
