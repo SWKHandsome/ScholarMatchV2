@@ -48,9 +48,6 @@ class EligibilityTest extends TestCase
     {
         return [
             'prospective bachelor' => ['funding_level', 'bachelor', ['bachelor'], E::Eligible, C::Met],
-            'offer required' => ['enrolment_status', 'planning', ['offer_received', 'enrolled'], E::NotEligible, C::NotMet],
-            'offer accepted' => ['enrolment_status', 'offer_received', ['offer_received', 'enrolled'], E::Eligible, C::Met],
-            'enrolled only' => ['enrolment_status', 'offer_received', ['enrolled'], E::NotEligible, C::NotMet],
             'citizenship fails' => ['citizenship', 'Non-Malaysian', ['Malaysian'], E::NotEligible, C::NotMet],
             'missing citizenship' => ['citizenship', null, ['Malaysian'], E::Manual, C::Manual],
             'unknown institution' => ['institution_type', 'undecided', ['public_university'], E::Manual, C::Manual],
@@ -83,6 +80,20 @@ class EligibilityTest extends TestCase
         $this->assertSame(E::Manual, $this->evaluate($this->profile(), $s)->status);
     }
 
+    public function test_retired_enrolment_and_completion_statuses_do_not_affect_eligibility_or_margin(): void
+    {
+        $profile = $this->profile(['enrolment_status' => null], [['completion_status' => 'in_progress']]);
+        foreach ([['mode' => 'restricted', 'values' => ['enrolled']], ['mode' => 'manual', 'notes' => 'Confirm an offer.'], []] as $enrolmentRule) {
+            $result = $this->evaluate($profile, $this->scholarship(['academic' => ['mode' => 'restricted'], 'enrolment_status' => $enrolmentRule], [[]]));
+            $this->assertSame(E::Eligible, $result->status);
+            $this->assertSame(((3.8 / 3.5) - 1) * 100, $result->academicMargin);
+            $this->assertArrayNotHasKey('enrolment_status', $result->criteria);
+            $this->assertArrayNotHasKey('completion_requirement', $result->academicRoutes[0]);
+            $this->assertStringNotContainsString('in_progress', $result->academicRoutes[0]['student']);
+            $this->assertStringNotContainsString('Completed', $result->academicRoutes[0]['requirement']);
+        }
+    }
+
     public function test_definite_failure_overrides_unresolved_criteria_and_has_no_margin(): void
     {
         $r = $this->evaluate($this->profile(['citizenship' => 'Non-Malaysian'], [[]]), $this->scholarship(['academic' => ['mode' => 'restricted'], 'citizenship' => ['mode' => 'restricted', 'values' => ['Malaysian']], 'additional' => ['mode' => 'manual', 'notes' => 'Interview']], [[]]));
@@ -105,7 +116,7 @@ class EligibilityTest extends TestCase
             'incompatible scales' => [[['grading_scale' => 5]], [[]], true, E::Manual, null],
             'unknown result' => [[['result_value' => null]], [[]], true, E::Manual, null],
             'unsupported result' => [[['result_type' => 'other']], [[]], true, E::Manual, null],
-            'in progress completed needed' => [[['completion_status' => 'in_progress']], [[]], true, E::NotEligible, null],
+            'legacy completion status is ignored' => [[['completion_status' => 'in_progress']], [[]], true, E::Eligible, ((3.8 / 3.5) - 1) * 100],
             'in progress accepted' => [[['completion_status' => 'in_progress']], [['completion_status' => 'in_progress']], true, E::Eligible, ((3.8 / 3.5) - 1) * 100],
             'unresolved subjects' => [[[]], [['manual_conditions' => 'A in Mathematics']], true, E::Manual, null],
             'subject unresolved with failed result' => [[['result_value' => 3.1]], [['manual_conditions' => 'A in Mathematics']], true, E::NotEligible, null],

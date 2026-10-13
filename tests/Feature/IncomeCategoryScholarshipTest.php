@@ -108,6 +108,35 @@ class IncomeCategoryScholarshipTest extends TestCase
         $this->assertDatabaseCount('scholarships', 0);
     }
 
+    public function test_automatic_form_can_keep_remove_or_replace_a_saved_numeric_income_limit(): void
+    {
+        $scholarship = Scholarship::factory()->create();
+        $incomeRule = ['mode' => 'restricted', 'kind' => 'numeric', 'maximum' => 5000];
+        $criteria = $scholarship->requirements->criteria;
+        $criteria['income'] = $incomeRule;
+        $scholarship->requirements->update(['criteria' => $criteria]);
+        $category = IncomeCategory::factory()->create();
+        $data = $this->scholarshipData();
+        unset($data['income_requirement']);
+        $data['automatic_criteria'] = true;
+        $data['preserve_income_rule'] = '1';
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->get('/admin/scholarships/'.$scholarship->id.'/edit')->assertOk()->assertSee('name="preserve_income_rule"', false)->assertSee('Remove saved income requirement')->assertDontSee('type="checkbox"', false);
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertEquals($incomeRule, $scholarship->requirements->fresh()->criteria['income']);
+
+        $data['preserve_income_rule'] = '0';
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame(['mode' => 'none'], $scholarship->requirements->fresh()->criteria['income']);
+
+        $scholarship->requirements->update(['criteria' => $criteria]);
+        $data['preserve_income_rule'] = '1';
+        $data['criteria']['income'] = ['category_ids' => [(string) $category->id]];
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('categories', $scholarship->requirements->fresh()->criteria['income']['kind']);
+        $this->assertSame([$category->id], $scholarship->incomeCategories->modelKeys());
+    }
+
     public function test_category_rules_from_string_form_values_are_evaluated_and_reference_changes_are_immediate(): void
     {
         $category = IncomeCategory::factory()->create(['name' => 'Demo B40', 'maximum' => 4999.99]);

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\IncomeCategory;
 use App\Models\Scholarship;
+use App\Models\ScholarshipAcademicRoute;
 use App\Models\StudentAcademicRecord;
 use App\Models\StudentProfile;
 use App\Models\StudyField;
@@ -70,6 +71,52 @@ class ScholarshipAdministrationTest extends TestCase
         $this->assertSame('0.0000', $scholarship->academicRoutes->first()->minimum);
     }
 
+    public function test_blank_dropdown_options_mean_no_restriction(): void
+    {
+        $data = $this->simplifiedData();
+        unset($data['income_requirement']);
+        $data['automatic_criteria'] = true;
+        foreach (array_diff(array_keys(config('scholarmatch.criteria')), ['academic', 'additional']) as $key) {
+            $data['criteria'][$key] = [$key === 'income' ? 'category_ids' : 'values' => ['']];
+        }
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->post('/admin/scholarships', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame(array_fill_keys(array_keys(config('scholarmatch.criteria')), ['mode' => 'none']), Scholarship::firstOrFail()->requirements->criteria);
+    }
+
+    public function test_multiple_dropdown_choices_are_saved_and_existing_two_choice_rules_are_preserved(): void
+    {
+        $fields = StudyField::factory()->count(2)->create();
+        $categories = IncomeCategory::factory()->count(2)->create();
+        $data = $this->simplifiedData();
+        unset($data['income_requirement']);
+        $data['automatic_criteria'] = true;
+        $selections = [
+            'citizenship' => ['Malaysian', 'Non-Malaysian'],
+            'funding_level' => ['bachelor', 'master'],
+            'institution_type' => ['public_university', 'private_university'],
+            'study_location' => ['Malaysia', 'overseas'],
+            'residence_state' => ['Penang', 'Kuala Lumpur'],
+            'study_field' => $fields->modelKeys(),
+        ];
+        foreach ($selections as $key => $values) {
+            $data['criteria'][$key] = ['values' => $values];
+        }
+        $data['criteria']['income'] = ['category_ids' => $categories->modelKeys()];
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->post('/admin/scholarships', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $scholarship = Scholarship::firstOrFail();
+        foreach ($selections as $key => $values) {
+            $this->assertSame(['mode' => 'restricted', 'values' => $values], $scholarship->requirements->criteria[$key]);
+        }
+        $this->assertSame($categories->modelKeys(), $scholarship->incomeCategories->modelKeys());
+        $this->assertSame($fields->modelKeys(), $scholarship->studyFields->modelKeys());
+        $this->get('/admin/scholarships/'.$scholarship->id.'/edit')->assertOk()->assertDontSee('type="checkbox"', false)->assertSee('This scholarship has multiple saved choices.')->assertSee('data-selection-dropdown="criteria[citizenship][values][]"', false)->assertSee('data-selection-dropdown="criteria[study_location][values][]"', false);
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame($selections['citizenship'], $scholarship->requirements->fresh()->criteria['citizenship']['values']);
+        $this->assertSame($selections['study_location'], $scholarship->requirements->fresh()->criteria['study_location']['values']);
+    }
+
     public function test_clearing_automatic_requirements_removes_restrictions_and_manual_notes(): void
     {
         $scholarship = Scholarship::factory()->create();
@@ -87,6 +134,52 @@ class ScholarshipAdministrationTest extends TestCase
         $this->assertDatabaseCount('scholarship_study_fields', 0);
         $this->assertDatabaseCount('scholarship_income_categories', 0);
         $this->assertDatabaseCount('scholarship_academic_routes', 0);
+    }
+
+    public function test_academic_routes_infer_result_type_and_retired_enrolment_rules_are_removed_on_save(): void
+    {
+        $data = $this->simplifiedData();
+        $data['automatic_criteria'] = true;
+        $data['criteria']['enrolment_status'] = ['mode' => 'restricted', 'values' => ['enrolled']];
+        $data['manual_requirements'] = 'Review the certificate for Other qualifications.';
+        $cases = ['SPM' => ['as_count', 8], 'UEC' => ['as_count', 5], 'A Level' => ['as_count', 3], 'STPM' => ['cgpa', 3.7], 'Matriculation' => ['cgpa', 3.8], 'Foundation' => ['cgpa', 3.6], 'Diploma' => ['cgpa', 3.5], 'Bachelor' => ['cgpa', 3.4], 'Master' => ['cgpa', 3.9], 'Other' => ['other', null]];
+        foreach ($cases as $qualification => [$resultType, $minimum]) {
+            $data['academic_routes'][] = ['qualification' => $qualification, 'minimum' => $minimum];
+        }
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->post('/admin/scholarships', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $scholarship = Scholarship::firstOrFail();
+        $this->assertArrayNotHasKey('enrolment_status', $scholarship->requirements->criteria);
+        foreach ($scholarship->academicRoutes as $route) {
+            $this->assertSame($cases[$route->qualification][0], $route->result_type);
+            $this->assertSame($route->result_type === 'cgpa' ? '4.0000' : null, $route->grading_scale);
+        }
+        $this->get('/admin/scholarships/'.$scholarship->id.'/edit')->assertOk()->assertDontSee('Required completion')->assertDontSee('Enrolment')->assertDontSee('<select id="academic_routes[0][result_type]"', false);
+    }
+
+    public function test_saved_route_result_format_is_preserved_and_foreign_route_ids_are_rejected(): void
+    {
+        $scholarship = Scholarship::factory()->create();
+        $scholarship->requirements->update(['criteria' => ['academic' => ['mode' => 'restricted']] + $scholarship->requirements->criteria]);
+        $route = ScholarshipAcademicRoute::factory()->create(['scholarship_id' => $scholarship->id, 'qualification' => 'STPM', 'result_type' => 'as_count', 'minimum' => 5, 'grading_scale' => null]);
+        $data = $this->simplifiedData();
+        $data['criteria']['academic'] = ['mode' => 'restricted'];
+        $data['academic_routes'] = [['id' => $route->id, 'qualification' => 'STPM', 'result_type' => 'as_count', 'minimum' => 5]];
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->get('/admin/scholarships/'.$scholarship->id.'/edit')->assertOk()->assertSee('Saved result format: Number of As.');
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+        $savedRoute = $scholarship->academicRoutes()->firstOrFail();
+        $this->assertSame('as_count', $savedRoute->result_type);
+        $this->assertSame('5.0000', $savedRoute->minimum);
+
+        $data['academic_routes'][0] = ['id' => $savedRoute->id, 'qualification' => 'Diploma', 'result_type' => 'as_count', 'minimum' => 3.5];
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+        $savedRoute = $scholarship->academicRoutes()->firstOrFail();
+        $this->assertSame('cgpa', $savedRoute->result_type);
+        $this->assertSame('4.0000', $savedRoute->grading_scale);
+
+        $foreignRoute = ScholarshipAcademicRoute::factory()->create();
+        $data['academic_routes'][0]['id'] = $foreignRoute->id;
+        $this->put('/admin/scholarships/'.$scholarship->id, $data)->assertSessionHasErrors('academic_routes.0.id');
+        $this->assertSame($savedRoute->id, $scholarship->academicRoutes()->firstOrFail()->id);
     }
 
     public function test_existing_manual_notes_are_prefilled_and_can_be_saved_in_the_separate_section(): void
@@ -162,6 +255,10 @@ class ScholarshipAdministrationTest extends TestCase
             ->assertSee('Scholarship description *')
             ->assertDontSee('name="benefits"', false)
             ->assertSee('name="manual_requirements"', false)
+            ->assertDontSee('type="checkbox"', false)
+            ->assertSee('Citizenship (one choice)')
+            ->assertSee('Study location (one choice)')
+            ->assertSee('Income categories (multiple choices)')
             ->assertDontSee('Criterion mode')
             ->assertDontSee('name="income_requirement"', false)
             ->assertDontSee('name="source_url"', false)

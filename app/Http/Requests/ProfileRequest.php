@@ -22,11 +22,21 @@ class ProfileRequest extends FormRequest
 
         $records = $this->input('academic_records');
         if (is_array($records)) {
+            $savedRecords = $this->user()?->profile?->academicRecords()->get()->keyBy('id') ?? collect();
+            $resultTypes = config('scholarmatch.qualification_result_types');
             foreach ($records as $index => $record) {
                 if (! is_array($record)) {
                     continue;
                 }
-                if (($record['result_type'] ?? '') === 'cgpa') {
+                $savedRecord = is_scalar($record['id'] ?? null) ? $savedRecords->get($record['id']) : null;
+                $qualification = $record['qualification'] ?? null;
+                $resultType = is_string($qualification) ? ($resultTypes[$qualification] ?? null) : null;
+                if ($savedRecord && $qualification === $savedRecord->qualification && ($record['result_type'] ?? null) === $savedRecord->result_type) {
+                    $resultType = $savedRecord->result_type;
+                }
+                $records[$index]['result_type'] = $resultType;
+                $records[$index]['completion_status'] = $savedRecord?->completion_status ?? 'completed';
+                if ($resultType === 'cgpa') {
                     $records[$index]['grading_scale'] = 4;
                 } elseif (! array_key_exists('grading_scale', $record)) {
                     $records[$index]['grading_scale'] = null;
@@ -39,7 +49,7 @@ class ProfileRequest extends FormRequest
     public function rules(): array
     {
         $rules = [];
-        foreach (['citizenship', 'residence_state', 'current_education_level', 'funding_level', 'enrolment_status', 'institution_type', 'study_location'] as $key) {
+        foreach (['citizenship', 'residence_state', 'current_education_level', 'funding_level', 'institution_type', 'study_location'] as $key) {
             $rules[$key] = ['nullable', Rule::in(config('scholarmatch.'.$key))];
         }
 
@@ -78,7 +88,7 @@ class ProfileRequest extends FormRequest
                 if (! is_array($record)) {
                     continue;
                 }
-                if (isset($record['id']) && ! $profile?->academicRecords()->whereKey($record['id'])->exists()) {
+                if (isset($record['id']) && (! is_scalar($record['id']) || ! $profile?->academicRecords()->whereKey($record['id'])->exists())) {
                     $validator->errors()->add("academic_records.$index.id", 'This qualification does not belong to your profile.');
                 }
                 if (in_array($record['result_type'] ?? '', ['as_count', 'cgpa'])) {

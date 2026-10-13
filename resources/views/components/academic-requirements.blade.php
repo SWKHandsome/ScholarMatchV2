@@ -18,7 +18,6 @@
                     <span class="pathway-qualification">{{ $route['qualification'] }}</span>
                     <div class="pathway-description">
                         <strong>{{ $route['result_requirement'] }}</strong>
-                        <span>{{ $route['completion_requirement'] }}</span>
                         @if($route['manual_conditions'])
                             <p class="pathway-condition"><b>Also verify</b> {{ $route['manual_conditions'] }}</p>
                         @endif

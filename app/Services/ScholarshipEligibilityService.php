@@ -67,7 +67,7 @@ class ScholarshipEligibilityService
 
     private function academicRoute(?StudentProfile $profile, ScholarshipAcademicRoute $route): array
     {
-        $base = ['id' => $route->id, 'qualification' => $route->qualification, 'requirement' => $route->requirementSummary(), 'result_requirement' => $route->resultRequirement(), 'completion_requirement' => $route->completionRequirement(), 'manual_conditions' => $route->manual_conditions, 'minimum' => $route->minimum === null ? null : (float) $route->minimum, 'result' => null, 'student' => 'No matching qualification recorded', 'explanation' => '', 'status' => C::Manual];
+        $base = ['id' => $route->id, 'qualification' => $route->qualification, 'requirement' => $route->requirementSummary(), 'result_requirement' => $route->resultRequirement(), 'manual_conditions' => $route->manual_conditions, 'minimum' => $route->minimum === null ? null : (float) $route->minimum, 'result' => null, 'student' => 'No matching qualification recorded', 'explanation' => '', 'status' => C::Manual];
         $records = $profile?->academicRecords->where('qualification', $route->qualification) ?? collect();
         if ($records->isEmpty()) {
             return array_replace($base, ['status' => $profile?->academic_records_complete ? C::NotMet : C::Manual, 'explanation' => $profile?->academic_records_complete ? 'Confirmed academic records contain no accepted qualification.' : 'Add the qualification or confirm your academic records are complete.']);
@@ -75,14 +75,13 @@ class ScholarshipEligibilityService
         $outcomes = [];
         foreach ($records as $record) {
             $state = C::Met;
-            $reason = 'Your recorded result meets the minimum and completion requirement.';
+            $reason = 'Your recorded result meets the minimum requirement.';
             $result = $record->result_value === null ? 'unknown result' : (float) $record->result_value;
-            $student = $record->qualification.' · '.$result.($record->result_type === 'as_count' ? ($record->result_value === null ? '' : ' As') : ' / '.($record->grading_scale === null ? 'unknown scale' : (float) $record->grading_scale)).' · '.$record->completion_status;
-            $completionFailure = $route->completion_status === 'completed' && $record->completion_status !== 'completed';
+            $student = $record->qualification.' · '.$result.($record->result_type === 'as_count' ? ($record->result_value === null ? '' : ' As') : ' / '.($record->grading_scale === null ? 'unknown scale' : (float) $record->grading_scale));
             $comparable = in_array($route->result_type, ['cgpa', 'as_count'], true) && $route->qualification !== 'Other' && $record->result_type === $route->result_type && $record->result_value !== null && $route->minimum !== null && ($route->result_type === 'as_count' || ($record->grading_scale !== null && $route->grading_scale !== null && (float) $record->grading_scale === (float) $route->grading_scale));
-            if ($completionFailure || ($comparable && (float) $record->result_value < (float) $route->minimum)) {
+            if ($comparable && (float) $record->result_value < (float) $route->minimum) {
                 $state = C::NotMet;
-                $reason = $completionFailure ? 'This route requires a completed qualification.' : 'Your recorded result is below the required minimum.';
+                $reason = 'Your recorded result is below the required minimum.';
             } elseif (! $comparable || $route->manual_conditions) {
                 $state = C::Manual;
                 $reason = $route->manual_conditions ? 'Verify the additional compulsory route condition: '.$route->manual_conditions : 'The result is missing, unsupported, or uses an incompatible scale. No automatic conversion is applied.';

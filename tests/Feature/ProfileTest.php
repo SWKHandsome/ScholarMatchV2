@@ -15,7 +15,7 @@ class ProfileTest extends TestCase
 
     private function data(): array
     {
-        return ['citizenship' => 'Malaysian', 'residence_state' => 'Selangor', 'current_education_level' => 'secondary', 'funding_level' => 'bachelor', 'enrolment_status' => 'planning', 'institution_type' => 'undecided', 'study_location' => 'undecided', 'study_field_undecided' => true, 'household_income' => 0, 'academic_records_complete' => true, 'academic_records' => [
+        return ['citizenship' => 'Malaysian', 'residence_state' => 'Selangor', 'current_education_level' => 'secondary', 'funding_level' => 'bachelor', 'institution_type' => 'undecided', 'study_location' => 'undecided', 'study_field_undecided' => true, 'household_income' => 0, 'academic_records_complete' => true, 'academic_records' => [
             ['qualification' => 'SPM', 'completion_status' => 'completed', 'result_type' => 'as_count', 'result_value' => 8, 'grading_scale' => 10],
             ['qualification' => 'Diploma', 'completion_status' => 'in_progress', 'result_type' => 'cgpa', 'result_value' => 3.8, 'grading_scale' => 4],
         ]];
@@ -46,6 +46,42 @@ class ProfileTest extends TestCase
         $this->assertSame('8.0000', $records->firstWhere('result_type', 'as_count')->result_value);
         $this->assertNull($records->firstWhere('result_type', 'as_count')->grading_scale);
         $this->get('/profile')->assertOk()->assertSee('CGPA (out of 4.00)')->assertDontSee('Grading scale maximum')->assertDontSee('[grading_scale]', false);
+    }
+
+    public function test_qualification_infers_result_format_without_completion_enrolment_or_result_type_inputs(): void
+    {
+        $cases = ['SPM' => ['as_count', 8], 'UEC' => ['as_count', 5], 'A Level' => ['as_count', 3], 'STPM' => ['cgpa', 3.7], 'Matriculation' => ['cgpa', 3.8], 'Foundation' => ['cgpa', 3.6], 'Diploma' => ['cgpa', 3.5], 'Bachelor' => ['cgpa', 3.4], 'Master' => ['cgpa', 3.9], 'Other' => ['other', null]];
+        $data = $this->data();
+        $data['academic_records'] = [];
+        foreach ($cases as $qualification => [$resultType, $result]) {
+            $data['academic_records'][] = ['qualification' => $qualification, 'result_value' => $result, 'result_notes' => $resultType === 'other' ? 'Provider should review my certificate.' : null];
+        }
+        $this->actingAs($user = User::factory()->create())->put('/profile', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $profile = $user->profile()->firstOrFail();
+        $this->assertNull($profile->enrolment_status);
+        $this->assertSame(100, $profile->completeness());
+        $this->assertNotContains('enrolment status', $profile->missingInformation());
+        foreach ($profile->academicRecords as $record) {
+            $this->assertSame($cases[$record->qualification][0], $record->result_type);
+            $this->assertSame($record->result_type === 'cgpa' ? '4.0000' : null, $record->grading_scale);
+        }
+        $this->get('/profile')->assertOk()->assertDontSee('Completion status')->assertDontSee('Enrolment status')->assertDontSee('<select id="academic_records[0][result_type]"', false);
+    }
+
+    public function test_legacy_result_format_is_preserved_until_the_qualification_changes(): void
+    {
+        $profile = StudentProfile::factory()->create();
+        $record = StudentAcademicRecord::factory()->create(['student_profile_id' => $profile->id, 'qualification' => 'STPM', 'result_type' => 'as_count', 'result_value' => 5, 'grading_scale' => null]);
+        $this->actingAs(User::findOrFail($profile->user_id))->get('/profile')->assertOk()->assertSee('Saved result format: Number of As.');
+        $data = ['academic_records' => [['id' => $record->id, 'qualification' => 'STPM', 'result_type' => 'as_count', 'result_value' => 5]]];
+        $this->put('/profile', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('as_count', $record->fresh()->result_type);
+        $this->assertSame('5.0000', $record->fresh()->result_value);
+        $data['academic_records'][0]['qualification'] = 'Diploma';
+        $data['academic_records'][0]['result_value'] = 3.8;
+        $this->put('/profile', $data)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('cgpa', $record->fresh()->result_type);
+        $this->assertSame('4.0000', $record->fresh()->grading_scale);
     }
 
     public function test_cgpa_cannot_exceed_four_even_when_a_different_scale_is_submitted(): void
@@ -81,7 +117,7 @@ class ProfileTest extends TestCase
         $this->actingAs($user)->put('/profile', ['citizenship' => 'Malaysian'])->assertRedirect();
         $profile = $user->profile()->firstOrFail();
         $this->assertNull($profile->household_income);
-        $this->assertSame(10, $profile->completeness());
+        $this->assertSame(11, $profile->completeness());
         $this->assertContains('household income', $profile->missingInformation());
     }
 

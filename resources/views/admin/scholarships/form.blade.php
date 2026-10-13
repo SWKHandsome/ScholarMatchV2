@@ -24,6 +24,7 @@
 </div>
 @php
     $criteria = old('criteria', $scholarship->requirements?->criteria ?? []);
+    $hasSubmittedSelections = old('automatic_criteria', false);
 @endphp
 @foreach(array_diff_key(config('scholarmatch.criteria'),['additional'=>true]) as $key=>$label)
 @php
@@ -34,45 +35,48 @@
 @php
     $savedIncome = $scholarship->requirements?->criteria['income'] ?? [];
     $hasExistingIncomeRule = ($savedIncome['mode'] ?? '') === 'restricted' && ($savedIncome['kind'] ?? '') === 'numeric';
-    $selectedCategories = ($criterion['mode'] ?? '') === 'restricted' && ($criterion['kind'] ?? '') === 'categories' ? ($criterion['category_ids'] ?? $scholarship->incomeCategories->pluck('id')->all()) : [];
+    $selectedCategories = $hasSubmittedSelections ? ($criterion['category_ids'] ?? []) : (($criterion['mode'] ?? '') === 'restricted' && ($criterion['kind'] ?? '') === 'categories' ? ($criterion['category_ids'] ?? $scholarship->incomeCategories->pluck('id')->all()) : []);
     $selectedCategories = is_array($selectedCategories) ? $selectedCategories : [];
 @endphp
 <div data-income-form>
-    <p class="help mb-3">Select eligible income categories. Leave all unchecked for no income restriction.</p>
+    <p class="help mb-3">Add the income categories that can apply. Leave the selection empty for no income restriction.</p>
     <fieldset data-income-categories>
-        <legend class="fs-6">Eligible income categories</legend>
-        <div class="income-category-options">
-            @foreach($categories as $category)
-            <label class="income-category-choice"><input type="checkbox" name="criteria[income][category_ids][]" value="{{ $category->id }}" @checked(in_array($category->id,$selectedCategories))> {{ $category->name }}</label>
-            @endforeach
-        </div>
+        <legend class="visually-hidden">Eligible income categories</legend>
+        <x-selection-dropdown name="criteria[income][category_ids]" label="Income categories" :options="$categories->pluck('name','id')->all()" :values="$selectedCategories" />
         @if($categories->isNotEmpty())
         <p class="help mt-2">Using configured categories for {{ $incomeReferenceYear }}. Select one or more; income ranges are filled automatically.</p>
         @else
         <p class="help">No active categories are available for this reference year. <a href="{{ route('admin.income.index') }}">Configure income categories</a> to add an income restriction.</p>
         @endif
-        @error('criteria.income.category_ids')<span class="field-error">{{ $message }}</span>@enderror
-        @error('criteria.income.category_ids.*')<span class="field-error">{{ $message }}</span>@enderror
     </fieldset>
     @if($hasExistingIncomeRule)
     <div class="mt-3">
-        <input type="hidden" name="preserve_income_rule" value="0">
-        <label><input type="checkbox" name="preserve_income_rule" value="1" data-preserve-income @checked(old('preserve_income_rule',true))> Keep saved income requirement:
+        <x-select name="preserve_income_rule" label="Saved income requirement" :options="[1=>'Keep saved income requirement',0=>'Remove saved income requirement']" :mapped="true" :value="old('preserve_income_rule',1)" :placeholder="null" data-preserve-income />
+        <p class="help">
             @if(isset($savedIncome['minimum'])) At least RM {{ number_format((float)$savedIncome['minimum'],2) }} per month. @endif
             @if(isset($savedIncome['maximum'])) At most RM {{ number_format((float)$savedIncome['maximum'],2) }} per month. @endif
-        </label>
-        <p class="help">Select categories to replace this limit, or uncheck it to remove the limit.</p>
+        </p>
+        <p class="help">Adding categories replaces this saved limit. Choose Remove saved income requirement to clear it.</p>
     </div>
     @endif
 </div>
 @else
 @php
-    $selectedValues = ($criterion['mode'] ?? '') === 'restricted' ? ($criterion['values'] ?? ($key === 'study_field' ? $scholarship->studyFields->pluck('id')->all() : [])) : [];
+    $selectedValues = $hasSubmittedSelections ? ($criterion['values'] ?? []) : (($criterion['mode'] ?? '') === 'restricted' ? ($criterion['values'] ?? ($key === 'study_field' ? $scholarship->studyFields->pluck('id')->all() : [])) : []);
     $selectedValues = is_array($selectedValues) ? $selectedValues : [];
 @endphp
 @if($key==='academic')<p class="help">Add an accepted qualification to set an academic requirement. No routes means no academic restriction. Meeting one complete route is enough.</p><input type="hidden" name="academic_routes" value=""><div id="route-rows">@foreach(old('academic_routes',($criterion['mode']??'')==='restricted'?$scholarship->academicRoutes->toArray():[])?:[] as $index=>$academicRoute)@include('admin.scholarships.route-row')@endforeach</div><button type="button" class="btn btn-outline" data-add-row="route">+ Add academic route</button>
-@elseif($key==='study_field')<p class="help">Select accepted fields. Leave all unchecked for no study field restriction.</p><fieldset><legend class="fs-6">Accepted fields</legend>@foreach($fields as $field)<label class="me-3 mb-2"><input type="checkbox" name="criteria[study_field][values][]" value="{{ $field->id }}" @checked(in_array($field->id,$selectedValues))> {{ $field->name }}</label>@endforeach</fieldset>
-@else<p class="help">@if($key==='residence_state') Choose from Malaysia's 13 states and 3 federal territories. @endif Select accepted values. Leave all unchecked for no restriction.</p><fieldset><legend class="fs-6">Accepted values</legend>@foreach(array_diff(config('scholarmatch.'.$key),['undecided']) as $option)<label class="me-3 mb-2"><input type="checkbox" name="criteria[{{ $key }}][values][]" value="{{ $option }}" @checked(in_array($option,$selectedValues))> {{ config('scholarmatch.labels.'.$option,ucfirst(str_replace('_',' ',$option))) }}</label>@endforeach</fieldset>@endif
+@elseif($key==='study_field')
+<x-selection-dropdown name="criteria[study_field][values]" label="Accepted study fields" :options="$fields->pluck('name','id')->all()" :values="$selectedValues" />
+@else
+@php
+    $options = collect(array_diff(config('scholarmatch.'.$key), ['undecided']))->mapWithKeys(fn ($option) => [$option => config('scholarmatch.labels.'.$option, ucfirst(str_replace('_', ' ', $option)))])->all();
+    $allowsMultiple = ! in_array($key, ['citizenship', 'study_location']) || count($selectedValues) > 1;
+@endphp
+@if($key==='residence_state')<p class="help">Choose from Malaysia's 13 states and 3 federal territories.</p>@endif
+@if(in_array($key,['citizenship','study_location']) && $allowsMultiple)<p class="help">This scholarship has multiple saved choices. They are kept below; remove any that no longer apply.</p>@endif
+<x-selection-dropdown :name="'criteria['.$key.'][values]'" :label="$label" :options="$options" :values="$selectedValues" :multiple="$allowsMultiple" />
+@endif
 @endif
 </div>
 @endforeach
@@ -87,5 +91,5 @@
         </div>
     </details>
 </div>
-<div class="panel mb-4"><h2>Source verification & publication</h2><p class="help">Source review confirms scholarship information, separately from student eligibility. Saving a reviewed record records your identity and the review time.</p><div class="row"><div class="col-md-6"><x-select name="source_status" label="Source verification" :options="['unreviewed','reviewed']" :value="old('source_status',$scholarship->source_status??'unreviewed')" :placeholder="null" /></div><div class="col-md-6"><x-select name="status" label="Application status" :options="['inactive','open','closed']" :value="old('status',$scholarship->status??'inactive')" :placeholder="null" /></div></div><input type="hidden" name="is_fictional" value="0"><label><input type="checkbox" name="is_fictional" value="1" @checked(old('is_fictional',$scholarship->is_fictional))> Fictional demonstration record (clearly labelled to students)</label></div><button class="btn btn-primary">Save scholarship</button></form><template id="route-template">@include('admin.scholarships.route-row',['index'=>'__INDEX__','academicRoute'=>[]])</template>
+<div class="panel mb-4"><h2>Source verification & publication</h2><p class="help">Source review confirms scholarship information, separately from student eligibility. Saving a reviewed record records your identity and the review time.</p><div class="row"><div class="col-md-6"><x-select name="source_status" label="Source verification" :options="['unreviewed','reviewed']" :value="old('source_status',$scholarship->source_status??'unreviewed')" :placeholder="null" /></div><div class="col-md-6"><x-select name="status" label="Application status" :options="['inactive','open','closed']" :value="old('status',$scholarship->status??'inactive')" :placeholder="null" /></div><div class="col-md-6"><x-select name="is_fictional" label="Record type" :options="[0=>'Real scholarship',1=>'Fictional demonstration record']" :mapped="true" :value="old('is_fictional',(int)$scholarship->is_fictional)" :placeholder="null" /><p class="help">Fictional demonstration records are clearly labelled to students.</p></div></div></div><button class="btn btn-primary">Save scholarship</button></form><template id="route-template">@include('admin.scholarships.route-row',['index'=>'__INDEX__','academicRoute'=>[]])</template>
 @endsection

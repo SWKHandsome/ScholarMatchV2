@@ -30,13 +30,13 @@ class StudentProfile extends Model
 
     public function completeness(): int
     {
-        return (10 - count($this->missingInformation())) * 10;
+        return (int) round((9 - count($this->missingInformation())) / 9 * 100);
     }
 
     public function missingInformation(): array
     {
         $missing = [];
-        foreach (['citizenship' => 'citizenship', 'residence_state' => 'state of residence', 'current_education_level' => 'current education', 'funding_level' => 'funding study level', 'enrolment_status' => 'enrolment status', 'institution_type' => 'institution type', 'study_location' => 'study location', 'household_income' => 'household income'] as $key => $label) {
+        foreach (['citizenship' => 'citizenship', 'residence_state' => 'state of residence', 'current_education_level' => 'current education', 'funding_level' => 'funding study level', 'institution_type' => 'institution type', 'study_location' => 'study location', 'household_income' => 'household income'] as $key => $label) {
             if ($this->$key === null || $this->$key === '') {
                 $missing[] = $label;
             }

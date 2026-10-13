@@ -16,14 +16,14 @@ class AcademicPresentationTest extends TestCase
     use RefreshDatabase;
 
     #[DataProvider('routeDescriptions')]
-    public function test_academic_requirements_are_readable_and_preserve_all_conditions(array $attributes, string $result, string $completion, string $summary): void
+    public function test_academic_requirements_are_readable_and_preserve_active_conditions(array $attributes, string $result, string $summary): void
     {
         $scholarship = Scholarship::factory()->create();
         $scholarship->requirements->update(['criteria' => ['academic' => ['mode' => 'restricted']] + $scholarship->requirements->criteria]);
         ScholarshipAcademicRoute::factory()->create(['scholarship_id' => $scholarship->id] + $attributes);
 
         $this->actingAs(User::factory()->create())->get('/recommendations')
-            ->assertOk()->assertSee('Academic pathways')->assertSee($result)->assertSee($completion)
+            ->assertOk()->assertSee('Academic pathways')->assertSee($result)->assertDontSee('Completed qualification')->assertDontSee('Completion status')
             ->assertDontSee('Meet any one pathway')->assertDontSee('Number of As ≥')->assertDontSee('(scale ');
         $this->get('/scholarships/'.$scholarship->id)->assertOk()->assertSee($summary)->assertDontSee('(scale ');
     }
@@ -31,19 +31,19 @@ class AcademicPresentationTest extends TestCase
     public static function routeDescriptions(): array
     {
         return [
-            'SPM count' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => 8, 'grading_scale' => 10], 'At least 8 As', 'Completed qualification', 'Completed SPM with at least 8 As'],
-            'one A' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => 1, 'grading_scale' => 10], 'At least 1 A', 'Completed qualification', 'Completed SPM with at least 1 A'],
-            'zero minimum' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => 0, 'grading_scale' => 10], 'At least 0 As', 'Completed qualification', 'Completed SPM with at least 0 As'],
-            'CGPA out of four' => [[], 'CGPA of at least 3.50/4.00', 'Completed qualification', 'Completed Diploma with CGPA of at least 3.50/4.00'],
-            'another CGPA scale' => [['minimum' => 4.2, 'grading_scale' => 5], 'CGPA of at least 4.20/5.00', 'Completed qualification', 'Completed Diploma with CGPA of at least 4.20/5.00'],
-            'zero CGPA minimum' => [['minimum' => 0], 'CGPA of at least 0.00/4.00', 'Completed qualification', 'Completed Diploma with CGPA of at least 0.00/4.00'],
-            'threshold precision' => [['minimum' => 3.5555], 'CGPA of at least 3.5555/4.00', 'Completed qualification', 'Completed Diploma with CGPA of at least 3.5555/4.00'],
-            'in progress accepts completed too' => [['completion_status' => 'in_progress'], 'CGPA of at least 3.50/4.00', 'In progress or completed', 'Diploma (in progress or completed) with CGPA of at least 3.50/4.00'],
-            'unknown completion' => [['completion_status' => 'unknown'], 'CGPA of at least 3.50/4.00', 'Completion status needs verification', 'Diploma (completion status needs verification) with CGPA of at least 3.50/4.00'],
-            'missing minimum' => [['minimum' => null], 'CGPA minimum needs verification', 'Completed qualification', 'Completed Diploma with CGPA minimum needs verification'],
-            'missing scale' => [['grading_scale' => null], 'CGPA of at least 3.50 (grading scale needs verification)', 'Completed qualification', 'Completed Diploma with CGPA of at least 3.50 (grading scale needs verification)'],
-            'missing As' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => null], 'Required number of As needs verification', 'Completed qualification', 'Completed SPM with required number of As needs verification'],
-            'unsupported result' => [['qualification' => 'Other', 'result_type' => 'other', 'minimum' => null, 'grading_scale' => null, 'manual_conditions' => 'Interview and subject review required.'], 'Results to verify with the provider', 'Completed qualification', 'Completed Other with results to verify with the provider; Interview and subject review required.'],
+            'SPM count' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => 8, 'grading_scale' => 10], 'At least 8 As', 'SPM with at least 8 As'],
+            'one A' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => 1, 'grading_scale' => 10], 'At least 1 A', 'SPM with at least 1 A'],
+            'zero minimum' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => 0, 'grading_scale' => 10], 'At least 0 As', 'SPM with at least 0 As'],
+            'CGPA out of four' => [[], 'CGPA of at least 3.50/4.00', 'Diploma with CGPA of at least 3.50/4.00'],
+            'another CGPA scale' => [['minimum' => 4.2, 'grading_scale' => 5], 'CGPA of at least 4.20/5.00', 'Diploma with CGPA of at least 4.20/5.00'],
+            'zero CGPA minimum' => [['minimum' => 0], 'CGPA of at least 0.00/4.00', 'Diploma with CGPA of at least 0.00/4.00'],
+            'threshold precision' => [['minimum' => 3.5555], 'CGPA of at least 3.5555/4.00', 'Diploma with CGPA of at least 3.5555/4.00'],
+            'legacy progress status is hidden' => [['completion_status' => 'in_progress'], 'CGPA of at least 3.50/4.00', 'Diploma with CGPA of at least 3.50/4.00'],
+            'legacy unknown completion is hidden' => [['completion_status' => 'unknown'], 'CGPA of at least 3.50/4.00', 'Diploma with CGPA of at least 3.50/4.00'],
+            'missing minimum' => [['minimum' => null], 'CGPA minimum needs verification', 'Diploma with CGPA minimum needs verification'],
+            'missing scale' => [['grading_scale' => null], 'CGPA of at least 3.50 (grading scale needs verification)', 'Diploma with CGPA of at least 3.50 (grading scale needs verification)'],
+            'missing As' => [['qualification' => 'SPM', 'result_type' => 'as_count', 'minimum' => null], 'Required number of As needs verification', 'SPM with required number of As needs verification'],
+            'unsupported result' => [['qualification' => 'Other', 'result_type' => 'other', 'minimum' => null, 'grading_scale' => null, 'manual_conditions' => 'Interview and subject review required.'], 'Results to verify with the provider', 'Other with results to verify with the provider; Interview and subject review required.'],
         ];
     }
 
@@ -60,7 +60,7 @@ class AcademicPresentationTest extends TestCase
 
         foreach (['/recommendations', '/dashboard', '/saved'] as $page) {
             $this->get($page)->assertOk()->assertSee('Meet any one pathway')
-                ->assertSeeInOrder(['SPM', 'At least 8 As', 'Completed qualification', 'OR', 'Diploma', 'CGPA of at least 3.50/4.00'])
+                ->assertSeeInOrder(['SPM', 'At least 8 As', 'OR', 'Diploma', 'CGPA of at least 3.50/4.00'])->assertDontSee('Completed qualification')
                 ->assertDontSee('(scale ');
         }
     }

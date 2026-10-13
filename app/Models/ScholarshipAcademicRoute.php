@@ -41,24 +41,10 @@ class ScholarshipAcademicRoute extends Model
         return 'Results to verify with the provider';
     }
 
-    public function completionRequirement(): string
-    {
-        return match ($this->completion_status) {
-            'completed' => 'Completed qualification',
-            'in_progress' => 'In progress or completed',
-            default => 'Completion status needs verification',
-        };
-    }
-
     public function requirementSummary(): string
     {
-        $qualification = match ($this->completion_status) {
-            'completed' => 'Completed '.$this->qualification,
-            'in_progress' => $this->qualification.' (in progress or completed)',
-            default => $this->qualification.' (completion status needs verification)',
-        };
         $result = $this->resultRequirement();
-        $summary = $qualification.' with '.(str_starts_with($result, 'CGPA') ? $result : lcfirst($result));
+        $summary = $this->qualification.' with '.(str_starts_with($result, 'CGPA') ? $result : lcfirst($result));
 
         return $summary.($this->manual_conditions ? '; '.$this->manual_conditions : '');
     }

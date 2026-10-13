@@ -26,11 +26,21 @@ class ScholarshipRequest extends FormRequest
 
         $academicRoutes = $this->input('academic_routes');
         if (is_array($academicRoutes)) {
+            $savedRoutes = $this->route('scholarship')?->academicRoutes()->get()->keyBy('id') ?? collect();
+            $resultTypes = config('scholarmatch.qualification_result_types');
             foreach ($academicRoutes as $index => $academicRoute) {
                 if (! is_array($academicRoute)) {
                     continue;
                 }
-                if (($academicRoute['result_type'] ?? '') === 'cgpa') {
+                $savedRoute = is_scalar($academicRoute['id'] ?? null) ? $savedRoutes->get($academicRoute['id']) : null;
+                $qualification = $academicRoute['qualification'] ?? null;
+                $resultType = is_string($qualification) ? ($resultTypes[$qualification] ?? null) : null;
+                if ($savedRoute && $qualification === $savedRoute->qualification && ($academicRoute['result_type'] ?? null) === $savedRoute->result_type) {
+                    $resultType = $savedRoute->result_type;
+                }
+                $academicRoutes[$index]['result_type'] = $resultType;
+                $academicRoutes[$index]['completion_status'] = $savedRoute?->completion_status ?? 'completed';
+                if ($resultType === 'cgpa') {
                     $academicRoutes[$index]['grading_scale'] = 4;
                 } elseif (! array_key_exists('grading_scale', $academicRoute)) {
                     $academicRoutes[$index]['grading_scale'] = null;
@@ -51,6 +61,15 @@ class ScholarshipRequest extends FormRequest
         $criteria = $this->input('criteria', []);
         if (! is_array($criteria) || ! is_array($criteria['income'] ?? [])) {
             return;
+        }
+
+        if ($this->boolean('automatic_criteria')) {
+            foreach ($criteria as $key => $criterion) {
+                $valueKey = $key === 'income' ? 'category_ids' : 'values';
+                if (is_array($criterion) && is_array($criterion[$valueKey] ?? null)) {
+                    $criteria[$key][$valueKey] = array_values(array_filter($criterion[$valueKey], fn (mixed $value): bool => $value !== '' && $value !== null));
+                }
+            }
         }
 
         $incomeRequirement = $this->input('income_requirement');
@@ -109,7 +128,7 @@ class ScholarshipRequest extends FormRequest
             'scholarship_url' => ['sometimes', 'required', 'url:http,https', 'max:2000'], 'income_requirement' => ['sometimes', 'required', Rule::in($incomeRequirements)],
             'automatic_criteria' => ['sometimes', 'boolean'], 'preserve_income_rule' => ['sometimes', 'boolean'], 'manual_requirements' => ['nullable', 'string', 'max:10000'],
             'status' => ['required', Rule::in(['open', 'closed', 'inactive'])], 'source_status' => ['required', Rule::in($published ? ['reviewed'] : ['reviewed', 'unreviewed'])], 'is_fictional' => ['sometimes', 'boolean'], 'criteria' => ['required', 'array'],
-            'academic_routes' => ['array', 'max:20'], 'academic_routes.*' => ['array'], 'criteria.*' => ['array'], 'academic_routes.*.qualification' => ['required', Rule::in(config('scholarmatch.qualification'))],
+            'academic_routes' => ['array', 'max:20'], 'academic_routes.*' => ['array'], 'academic_routes.*.id' => ['nullable', 'integer', 'distinct'], 'criteria.*' => ['array'], 'academic_routes.*.qualification' => ['required', Rule::in(config('scholarmatch.qualification'))],
             'academic_routes.*.completion_status' => ['required', Rule::in(config('scholarmatch.completion_status'))], 'academic_routes.*.result_type' => ['required', Rule::in(config('scholarmatch.result_type'))],
             'academic_routes.*.minimum' => ['nullable', 'numeric', 'min:0', 'max:9999', 'decimal:0,4'], 'academic_routes.*.grading_scale' => ['nullable', 'numeric', 'gt:0', 'max:30', 'decimal:0,4'], 'academic_routes.*.manual_conditions' => ['nullable', 'string', 'max:2000'],
             'criteria.income.kind' => ['nullable', Rule::in(['numeric', 'categories'])], 'criteria.income.minimum' => ['nullable', 'numeric', 'min:0', 'decimal:0,2', 'max:9999999999'], 'criteria.income.maximum' => ['nullable', 'numeric', 'min:0', 'decimal:0,2', 'max:9999999999'],
@@ -119,7 +138,7 @@ class ScholarshipRequest extends FormRequest
         foreach (array_keys(config('scholarmatch.criteria')) as $key) {
             $rules["criteria.$key.mode"] = [$published ? 'required' : 'nullable', Rule::in($key === 'additional' ? ['none', 'manual'] : ['none', 'restricted', 'manual'])];
             $rules["criteria.$key.notes"] = ['nullable', 'string', 'max:'.($key === 'additional' ? 10000 : 2000)];
-            if (in_array($key, ['citizenship', 'funding_level', 'enrolment_status', 'institution_type', 'study_location', 'residence_state'])) {
+            if (in_array($key, ['citizenship', 'funding_level', 'institution_type', 'study_location', 'residence_state'])) {
                 $rules["criteria.$key.values"] = ['nullable', 'array'];
                 $rules["criteria.$key.values.*"] = [Rule::in(array_diff(config('scholarmatch.'.$key), ['undecided'])), 'distinct'];
             }
@@ -183,6 +202,9 @@ class ScholarshipRequest extends FormRequest
             foreach ($this->input('academic_routes', []) as $index => $route) {
                 if (! is_array($route)) {
                     continue;
+                }
+                if (isset($route['id']) && (! is_scalar($route['id']) || ! $this->route('scholarship')?->academicRoutes()->whereKey($route['id'])->exists())) {
+                    $validator->errors()->add("academic_routes.$index.id", 'This academic route does not belong to this scholarship.');
                 }
                 $numeric = in_array($route['result_type'] ?? '', ['cgpa', 'as_count']);
                 if ($numeric && ! isset($route['minimum'])) {

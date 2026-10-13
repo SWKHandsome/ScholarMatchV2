@@ -92,7 +92,11 @@ class ScholarshipController extends Controller
             $s->requirements()->updateOrCreate([], ['criteria' => $criteria]);
             $s->academicRoutes()->delete();
             if (($criteria['academic']['mode'] ?? '') === 'restricted') {
-                $s->academicRoutes()->createMany($data['academic_routes']);
+                $s->academicRoutes()->createMany(array_map(function (array $academicRoute): array {
+                    unset($academicRoute['id']);
+
+                    return $academicRoute;
+                }, $data['academic_routes']));
             }
             $s->studyFields()->sync(($criteria['study_field']['mode'] ?? '') === 'restricted' ? ($criteria['study_field']['values'] ?? []) : []);
             $s->incomeCategories()->sync(($criteria['income']['mode'] ?? '') === 'restricted' && ($criteria['income']['kind'] ?? '') === 'categories' ? ($criteria['income']['category_ids'] ?? []) : []);
